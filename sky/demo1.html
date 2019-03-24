@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>the first three.js </title>
+    <style>
+        body { margin: 0;}
+        canvas { width: 100%; height: 100%;}
+    </style>
+</head>
+<body>
+<script src="../three/three.js"></script>
+<script>
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+
+    var renderer = new THREE.WebGLRenderer();
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.setClearColor(0x000000);
+    document.body.appendChild( renderer.domElement );
+
+    //添加光源
+    var point=new THREE.PointLight(0xffffff);
+    point.position.set(0,0,100);//点光源位置
+    scene.add(point);
+
+    camera.position.z = 5;
+
+    //绘制若干个点
+    var starsGeometry = new THREE.Geometry();
+    for ( var i = 0; i < 10000; i ++ ) {
+
+        var star = new THREE.Vector3();//创建点并在下面设置点的位置
+        star.x = THREE.Math.randFloatSpread(2500 );
+        star.y = THREE.Math.randFloatSpread(2000 );
+        star.z = THREE.Math.randFloatSpread( 2500 );
+
+        starsGeometry.vertices.push( star )
+    }
+
+    var starsMaterial = new THREE.PointsMaterial( { color: 0x888888 } )
+    var starField = new THREE.Points( starsGeometry, starsMaterial );
+    scene.add( starField );
+
+    //画线
+    for(var i = 0; i<100;i++) {
+        var point = new THREE.Vector3(i,0,0);
+        var point1 = new THREE.Vector3(0,i,0);
+        var starsGeometry1 = new THREE.Geometry();
+        var line = starsGeometry1.vertices.push(point,point1);
+        var line1 = new THREE.Line(starsGeometry1, starsMaterial);
+        scene.add(line1)
+    }
+
+    //创建一个三角平面
+    var geometry2 = new THREE.Geometry();
+    var p1 = new THREE.Vector3(0,0,0);
+    var p2 = new THREE.Vector3(-80,0,0);
+    var p3 = new THREE.Vector3(0,-80,0);
+    geometry2.vertices.push(p1,p2,p3); //顶点坐标添加到geometry对象
+    var normal = new THREE.Vector3( 0, 0, 1 ); //三角面法向量
+    var face = new THREE.Face3( 0, 1, 2, normal); //创建三角面
+    geometry2.faces.push( face ); //三角面添加到几何体
+    var material2=new THREE.MeshLambertMaterial({
+        color:0x0000ff,//三角面颜色
+        side:THREE.DoubleSide//两面可见
+    });//材质对象
+    var mesh=new THREE.Mesh(geometry2,material2);//网格模型对象
+    scene.add(mesh);//网格模型添加到场景中
+
+
+    var T0 = new Date();//上次时间
+    function render() {
+        var T1 = new Date();//本次时间
+        var t = T1-T0;//时间差
+        T0 = T1;//把本次时间赋值给上次时间
+        requestAnimationFrame(render);
+        renderer.render(scene,camera);//执行渲染操作
+        camera.rotateY(-0.0001*t);//让相机转动以此来实现整个场景的旋转
+        camera.rotateX(0.00005*t);
+        camera.rotateZ(0.00005*t);
+    }
+    render();
+
+</script>
+
+</body>
+</html>

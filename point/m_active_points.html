@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            margin: 0;
+            height: 100%;
+        }
+
+        canvas {
+            display: block;
+        }
+
+
+        #main {
+            /*width: 1920px;*/
+            /*height: 1080px;*/
+            border: solid 1px black;
+        }
+    </style>
+</head>
+<body>
+<canvas id="main"></canvas>
+<button onclick="changeColor(event)">change color</button>
+<button onclick="recover(event)">recover</button>
+<button onclick="enableEvent(event)">enable event</button>
+<button onclick="enableAnimate(event)">enable event</button>
+<label for="" id="x"></label>
+<label for="" id="y"></label>
+<label for="" id="z"></label>
+</body>
+<script src="../three/WebGL.js"></script>
+<script src="../three/three.js"></script>
+<script src="../three/stats.min.js"></script>
+<script src="../three/OrbitControls.js"></script>
+<script src="../three/dat.gui.min.js"></script>
+<script src="../three/STLLoader.js"></script>
+<script type="x-shader/x-vertex" id="vertexshader">
+                attribute float size;
+                attribute vec3 customColor;
+                varying vec3 vColor;
+                void main() {
+                    vColor = customColor;
+                    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+                    gl_PointSize = size * ( 300.0 / -mvPosition.z );
+                    gl_Position = projectionMatrix * mvPosition;
+                }
+            </script>
+<script type="x-shader/x-fragment" id="fragmentshader">
+                uniform vec3 color;
+                uniform sampler2D texture;
+                varying vec3 vColor;
+                void main() {
+                    gl_FragColor = vec4( color * vColor, 1.0 );
+                    gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
+                    if ( gl_FragColor.a < ALPHATEST ) discard;
+                }
+            </script>
+<script>
+    // 粒子的随机运动，离理想中的还有点差距，需要再做修改，主要是考虑布朗运动
+    let is_enable_event = true;
+	let is_animate = true;
+    let main = void 0;
+    let renderer = void 0;
+    let scene = void 0;
+    let camera = void 0;
+    let controls = void 0;
+    let width = 1000;
+    let height = 800;
+    let particles = void 0;
+    let raycaster = new THREE.Raycaster();
+    let mouse = new THREE.Vector2();
+    let clock = new THREE.Clock();
+    let count = 0;
+    let frame = 0;
+    let radius = 10;
+    let SEPARATION = 100, AMOUNTX = 50, AMOUNTY = 50;
+    let POINT_NUMBER = 10;
+    let active_random_lst = [];
+    let x_label = document.querySelector('#x');
+    let y_label = document.querySelector('#y');
+    let z_label = document.querySelector('#z');
+    let origin_positions = [];
+    let other_data_lst = [];
+    let speed = 0.1;
+
+    function init() {
+        initCanvas();
+        initRenderer();
+        initScene();
+        initAxes();
+        initCamera();
+        initControls();
+        initMesh();
+
+        animate();
+        addEvent();
+    }
+
+    function initCanvas() {
+        main = document.querySelector('#main');
+        main.style.width = width + 'px';
+        main.style.height = height + 'px';
+    }
+
+    function initRenderer() {
+        if (renderer === void 0) {
+            renderer = new THREE.WebGLRenderer({
+                canvas: main,
+                // 在 css 中设置背景色透明显示渐变色
+                alpha: true,
+                // 开启抗锯齿
+                antialias: false
+            });
+
+            // 这句要加，否则镜头会发虚
+            renderer.setSize(width, height);
+            renderer.setClearColor(0x000000);
+        }
+    }
+
+    function render() {
+        // if (frame % 120 === 0) {
+        range_line();
+        // }
+
+        count += 0.01;
+        frame++;
+        renderer.render(scene, camera);
+    }
+
+    function activeRandom() {
+        var positions = particles.geometry.attributes.position.array;
+
+        for (var i = 0; i < POINT_NUMBER; i++) {
+            let vector = active_random_lst[i];
+
+            let x = vector.x;
+            let y = vector.y;
+            let z = vector.z;
+
+            positions[i * 3] = origin_positions[i].x + ( Math.sin( x + count) * 10 );
+            positions[i * 3 + 1] = origin_positions[i].y + ( Math.sin( y + count) * 10 );
+            positions[i * 3 + 2] = origin_positions[i].z + ( Math.sin( z + count) * 10 );
+        }
+
+        particles.geometry.attributes.position.needsUpdate = true;
+    }
+
+    function simple() {
+        var positions = particles.geometry.attributes.position.array;
+
+        for (var i = 0; i < POINT_NUMBER; i++) {
+            // // positions[i * 3] = (Math.random() > 0.5 ? -1 : 1) * ( Math.sin( ( i + count ) * 0.3 ) * 10 ) +
+            // //     (Math.random() > 0.5 ? -1 : 1) * ( Math.sin( ( i + count ) * 0.5 ) * 1 );
+            positions[i * 3 + 1] = ( Math.sin( (i + count ) * 0.3 ) * 10 ) +
+                ( Math.sin( (i + count ) * 0.5 ) * 1 );
+            // // positions[i * 3 + 2] =  (Math.random() > 0.5 ? -1 : 1) * ( Math.sin( ( i + count ) * 0.3 ) * 10) -
+            // //     (Math.random() > 0.5 ? -1 : 1) * ( Math.sin( ( i + count ) * 0.5 ) * 1 );
+        }
+
+        particles.geometry.attributes.position.needsUpdate = true;
+    }
+
+    function initMesh() {
+        let positions = new Float32Array(POINT_NUMBER * 3);
+
+        for (var i = 0; i < POINT_NUMBER; i++) {
+            // let x = Math.random() * radius - radius / 2;
+            // let y = Math.random() * radius - radius / 2;
+            // let z = Math.random() * radius - radius / 2;
+
+            other_data_lst.push({
+                range: {
+                    x: {
+                        min: 0 - radius,
+                        max: radius,
+                    },
+                    y: {
+                        min: 0 - radius,
+                        max: radius,
+                    },
+                    z: {
+                        min: 0 - radius,
+                        max: radius,
+                    }
+                },
+                last_position: {
+                    x: 0,
+                    y: 0,
+                    z: 0,
+                },
+                start_direction: {
+                    x: Math.random() > 0.5 ? 1 : -1,
+                    y: Math.random() > 0.5 ? 1 : -1,
+                    z: Math.random() > 0.5 ? 1 : -1,
+                }
+            });
+
+            let x = 0;
+            let y = 0;
+            // let y = i * radius;
+            let z = 0;
+
+            origin_positions.push({
+                x: x,
+                y: y,
+                z: z,
+            });
+
+            let tmp = new THREE.Vector3(Math.random() * 10 - 6, Math.random() * 10 - 6, Math.random() * 10 - 6);
+            active_random_lst.push(tmp);
+
+            positions[ i * 3 ] = x;
+            positions[ i * 3 + 1 ] = y;
+            positions[ i * 3 + 2 ] = z;
+        }
+
+        // var numParticles = AMOUNTX * AMOUNTY;
+        // var positions = new Float32Array( numParticles * 3 );
+        //
+        // var i = 0, j = 0;
+        // for ( var ix = 0; ix < AMOUNTX; ix ++ ) {
+        //     for ( var iy = 0; iy < AMOUNTY; iy ++ ) {
+        //         positions[ i ] = ix * SEPARATION - ( ( AMOUNTX * SEPARATION ) / 2 ); // x
+        //         positions[ i + 1 ] = 0; // y
+        //         positions[ i + 2 ] = iy * SEPARATION - ( ( AMOUNTY * SEPARATION ) / 2 ); // z
+        //         i += 3;
+        //         j ++;
+        //     }
+        // }
+
+        let geometry = new THREE.BufferGeometry();
+        geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+        let material = new THREE.PointsMaterial({
+            color: 0xffffff,
+            size: 10,
+            opacity: 0.6,
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            map: generateSprite(),
+            depthTest: false
+        });
+
+        particles = new THREE.Points(geometry, material);
+        scene.add(particles);
+    }
+
+    function range_line() {
+        let positions = particles.geometry.attributes.position.array;
+
+        for (var i = 0; i < POINT_NUMBER; i++) {
+            let range = other_data_lst[i].range;
+            let last_position = other_data_lst[i].last_position;
+
+            if (positions[i * 3] > range.x.max) {
+                last_position.x = positions[i * 3];
+                positions[i * 3] = positions[i * 3] - speed;
+            }
+            else if (positions[i * 3] < range.x.min) {
+                last_position.x = positions[i * 3];
+                positions[i * 3 ] = positions[i * 3] + speed;
+            }
+            else {
+                if (frame === 0) {
+                    let start_direction = other_data_lst[i].start_direction;
+
+                    if (start_direction.x > 0) {
+                        last_position.x = positions[i * 3];
+                        positions[i * 3] = positions[i * 3] + speed;
+                    }
+                    else {
+                        last_position.x = positions[i * 3];
+                        positions[i * 3] = positions[i * 3] - speed;
+                    }
+                }
+                else {
+                    if (positions[i * 3] > last_position.x) {
+                        last_position.x = positions[i * 3];
+                        positions[i * 3] = positions[i * 3] + speed;
+                    } else {
+                        last_position.x = positions[i * 3];
+                        positions[i * 3] = positions[i * 3] - speed;
+                    }
+                }
+
+            }
+
+            if (positions[i * 3 + 1] > range.y.max) {
+                last_position.y = positions[i * 3 + 1];
+                positions[i * 3 + 1] = positions[i * 3 + 1] - speed;
+            }
+            else if (positions[i * 3 + 1] < range.y.min) {
+                last_position.y = positions[i * 3 + 1];
+                positions[i * 3 + 1] = positions[i * 3 + 1] + speed;
+            }
+            else {
+                if (frame === 0) {
+                    let start_direction = other_data_lst[i].start_direction;
+
+                    if (start_direction.y > 0) {
+                        last_position.y = positions[i * 3 + 1];
+                        positions[i * 3 + 1] = positions[i * 3 + 1] + speed;
+                    }
+                    else {
+                        last_position.y = positions[i * 3 + 1];
+                        positions[i * 3 + 1] = positions[i * 3 + 1] - speed;
+                    }
+                }
+                else {
+                    if (positions[i * 3 + 1] > last_position.y) {
+                        last_position.y = positions[i * 3 + 1];
+                        positions[i * 3 + 1] = positions[i * 3 + 1] + speed;
+                    } else {
+                        last_position.y = positions[i * 3 + 1];
+                        positions[i * 3 + 1] = positions[i * 3 + 1] - speed;
+                    }
+                }
+
+            }
+
+            if (positions[i * 3 + 2] > range.z.max) {
+                last_position.z = positions[i * 3 + 2];
+                positions[i * 3 + 2] = positions[i * 3 + 2] - speed;
+            }
+            else if (positions[i * 3 + 2] < range.z.min) {
+                last_position.z = positions[i * 3 + 2];
+                positions[i * 3 + 2] = positions[i * 3 + 2] + speed;
+            }
+            else {
+                if (frame === 0) {
+                    let start_direction = other_data_lst[i].start_direction;
+
+                    if (start_direction.z > 0) {
+                        last_position.z = positions[i * 3 + 2];
+                        positions[i * 3 + 2] = positions[i * 3 + 2] + speed;
+                    }
+                    else {
+                        last_position.z = positions[i * 3 + 2];
+                        positions[i * 3 + 2] = positions[i * 3 + 2] - speed;
+                    }
+                }
+                else {
+                    if (positions[i * 3 + 2] > last_position.z) {
+                        last_position.z = positions[i * 3 + 2];
+                        positions[i * 3 + 2] = positions[i * 3 + 2] + speed;
+                    } else {
+                        last_position.z = positions[i * 3 + 2];
+                        positions[i * 3 + 2] = positions[i * 3 + 2] - speed;
+                    }
+                }
+
+            }
+
+            x_label.textContent = positions[ i * 3 ];
+        }
+
+
+        particles.geometry.attributes.position.needsUpdate = true;
+    }
+
+    function initScene() {
+        if (scene === void 0) {
+            scene = new THREE.Scene();
+        }
+    }
+
+    function initCamera() {
+        if (camera === void 0) {
+            camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000);
+            camera.position.set(0, 0, 300);
+            camera.lookAt(scene.position);
+        }
+    }
+
+    // 添加辅助轴
+    function initAxes() {
+        //轴辅助 （每一个轴的长度）
+        let axes = new THREE.AxesHelper(500);
+        scene.add(axes);
+    }
+
+
+
+    function initControls() {
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
+        // 使动画循环使用时阻尼或自转 意思是否有惯性
+        controls.enableDamping = true;
+        //动态阻尼系数 就是鼠标拖拽旋转灵敏度
+        //controls.dampingFactor = 0.25;
+        //是否可以缩放
+        controls.enableZoom = true;
+        //是否自动旋转
+        controls.autoRotate = false;
+        //设置相机距离原点的最远距离
+        controls.minDistance = 20;
+        //设置相机距离原点的最远距离
+        controls.maxDistance = 10000;
+        //是否开启右键拖拽
+        controls.enablePan = true;
+    }
+
+    function animate() {
+
+        // if (particles && is_animate) {
+        //     particles.rotateZ(Math.PI/4000)
+        // }
+
+        let delta = clock.getDelta();
+        controls.update(delta);
+        requestAnimationFrame(animate);
+        render();
+    }
+
+    function createCanvasMaterial(color = '#FFFFFF' , size = 256) {
+        var matCanvas = document.createElement('canvas');
+        matCanvas.width = matCanvas.height = size;
+        var matContext = matCanvas.getContext('2d');
+        // create exture object from canvas.
+        var texture = new THREE.Texture(matCanvas);
+        // Draw a circle
+        var center = size/2;
+        matContext.beginPath();
+        matContext.arc(center, center, size/2, 0, 2 * Math.PI, false);
+        matContext.closePath();
+        matContext.fillStyle = color;
+        matContext.fill();
+        // need to set needsUpdate
+        texture.needsUpdate = true;
+        // return a texture made from the canvas
+        return texture;
+    }
+
+    function generateSprite() {
+
+        let canvas = document.createElement('canvas');
+        canvas.width = 16;
+        canvas.height = 16;
+
+        let context = canvas.getContext('2d');
+        let gradient = context.createRadialGradient(canvas.width / 2, canvas.height / 2, 0, canvas.width / 2, canvas.height / 2, canvas.width / 2);
+        gradient.addColorStop(0, 'rgba(255,255,255,1)');
+        gradient.addColorStop(0.2, 'rgba(0,255,255,1)');
+        gradient.addColorStop(0.4, 'rgba(0,0,64,1)');
+        gradient.addColorStop(1, 'rgba(0,0,0,1)');
+        context.fillStyle = gradient;
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        let texture = new THREE.Texture(canvas);
+        texture.needsUpdate = true;
+        return texture;
+
+    }
+
+    window.onload = function() {
+        init();
+    };
+
+    function addEvent() {
+        window.addEventListener('mouseup', onMouseUp);
+    }
+
+    function onMouseUp(event) {
+        if (is_enable_event) {
+            mouseDownPoint(event);
+        }
+    }
+
+    function mouseDownPoint(event) {
+        event.preventDefault();
+        mouse.x = ( event.clientX / width ) * 2 - 1;
+        mouse.y = - ( event.clientY / height ) * 2 + 1;
+        raycaster.setFromCamera( mouse, camera );
+
+        if (particles) {
+            let intersects = raycaster.intersectObject(particles);
+            if (intersects.length > 0) {
+                console.log(intersects[0].index);
+            }
+        }
+    }
+
+    function enableEvent(event) {
+        is_enable_event = !is_enable_event;
+    }
+
+	function enableAnimate(event) {
+		is_animate = !is_animate;
+	}
+	</script>
+</html>
+

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            margin: 0;
+            height: 100%;
+        }
+
+        canvas {
+            display: block;
+        }
+
+
+        #main {
+            /*width: 1920px;*/
+            /*height: 1080px;*/
+            border: solid 1px black;
+        }
+    </style>
+</head>
+<body>
+<canvas id="main"></canvas>
+</body>
+<script src="../three/WebGL.js"></script>
+<script src="../three/three.js"></script>
+<script src="../three/stats.min.js"></script>
+<script src="../three/OrbitControls.js"></script>
+<script src="../three/dat.gui.min.js"></script>
+<script type="x-shader/x-vertex" id="vertexshader">
+                attribute float size;
+                attribute vec3 customColor;
+                varying vec3 vColor;
+                void main() {
+                    vColor = customColor;
+                    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+                    gl_PointSize = size * ( 300.0 / -mvPosition.z );
+                    gl_Position = projectionMatrix * mvPosition;
+                }
+            </script>
+<script type="x-shader/x-fragment" id="fragmentshader">
+                uniform vec3 color;
+                uniform sampler2D texture;
+                varying vec3 vColor;
+                void main() {
+                    gl_FragColor = vec4( color * vColor, 1.0 );
+                    gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
+                    if ( gl_FragColor.a < ALPHATEST ) discard;
+                }
+            </script>
+<script>
+    let is_enable_event = true;
+    let main = void 0;
+    let renderer = void 0;
+    let scene = void 0;
+    let camera = void 0;
+    let controls = void 0;
+    let width = 1000;
+    let height = 800;
+    let cube = void 0;
+    let points = void 0;
+    let raycaster = new THREE.Raycaster();
+    let mouse = new THREE.Vector2();
+    let line = void 0;
+
+    function init() {
+        initCanvas();
+        initRenderer();
+        initScene();
+        initAxes();
+        initCamera();
+        initControls();
+        initMesh();
+
+        animate();
+        addEvent();
+    }
+
+    function initCanvas() {
+        main = document.querySelector('#main');
+        main.style.width = width + 'px';
+        main.style.height = height + 'px';
+    }
+
+    function initRenderer() {
+        if (renderer === void 0) {
+            renderer = new THREE.WebGLRenderer({
+                canvas: main,
+                // 在 css 中设置背景色透明显示渐变色
+                alpha: true,
+                // 开启抗锯齿
+                antialias: false
+            });
+
+            // 这句要加，否则镜头会发虚
+            renderer.setSize(width, height);
+            renderer.setClearColor(0x000000);
+        }
+    }
+
+    function render() {
+        renderer.render(scene, camera);
+    }
+
+    function initScene() {
+        if (scene === void 0) {
+            scene = new THREE.Scene();
+            // 雾化效果
+            // scene.fog = new THREE.Fog(0x090918, 1, 600);
+        }
+    }
+
+    function initCamera() {
+        if (camera === void 0) {
+            camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000);
+            camera.position.set(0, 0, 500);
+            camera.lookAt(scene.position);
+        }
+    }
+
+    // 添加辅助轴
+    function initAxes() {
+        //轴辅助 （每一个轴的长度）
+        let axes = new THREE.AxesHelper(500);
+        scene.add(axes);
+    }
+
+    function initMesh() {
+        let geometry = new THREE.BufferGeometry();
+        let positions = getPosition();
+        geometry.addAttribute( 'position', new THREE.BufferAttribute( positions, 3 ) );
+
+        let material = new THREE.PointsMaterial({
+            size: 1,
+            map: createCanvasMaterial(),
+            transparent: true,
+        });
+
+        points = new THREE.Points( geometry, material );
+        scene.add(points);
+
+        drawLine(positions);
+
+    }
+
+    function drawLine(positions) {
+        let material = new THREE.LineBasicMaterial({
+            color: 0xffffff
+        });
+
+        let indices = [0, 1, 0, 2, 0, 3, 0, 4];
+        // let length = 10;
+        // indices.push(0);
+        // for (var i = 1; i < length; i++) {
+        //     indices.push(i);
+        //     indices.push(i);
+        // }
+        //
+        // indices.push(length);
+
+        console.log(indices);
+
+        let geometry = new THREE.BufferGeometry();
+        geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometry.setIndex(new THREE.BufferAttribute(new Uint16Array(indices), 1));
+        line = new THREE.LineSegments(geometry, material);
+        scene.add(line);
+    }
+
+    function initControls() {
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
+        // 使动画循环使用时阻尼或自转 意思是否有惯性
+        controls.enableDamping = true;
+        //动态阻尼系数 就是鼠标拖拽旋转灵敏度
+        //controls.dampingFactor = 0.25;
+        //是否可以缩放
+        controls.enableZoom = true;
+        //是否自动旋转
+        controls.autoRotate = false;
+        //设置相机距离原点的最远距离
+        controls.minDistance = 20;
+        //设置相机距离原点的最远距离
+        controls.maxDistance = 10000;
+        //是否开启右键拖拽
+        controls.enablePan = true;
+    }
+
+    function animate() {
+        if (points) {
+            points.rotateY(Math.PI/4000);
+        }
+
+        if (line) {
+            line.rotateY(Math.PI/4000);
+        }
+
+        controls.update();
+        render();
+        requestAnimationFrame(animate);
+    }
+
+    function createCanvasMaterial(color = '#FFFFFF' , size = 256) {
+        let matCanvas = document.createElement('canvas');
+        matCanvas.width = matCanvas.height = size;
+        let matContext = matCanvas.getContext('2d');
+
+        let center = size/2;
+        matContext.beginPath();
+        matContext.arc(center, center, size/2, 0, 2 * Math.PI);
+        matContext.closePath();
+        matContext.fillStyle = color;
+        matContext.fill();
+
+        let texture = new THREE.Texture(matCanvas);
+        texture.needsUpdate = true;
+        return texture;
+    }
+
+    window.onload = function() {
+        init();
+    };
+
+    function addEvent() {
+        window.addEventListener('mouseup', mouseDownPoint);
+    }
+
+    function mouseDownPoint(event) {
+        event.preventDefault();
+        mouse.x = ( event.clientX / width ) * 2 - 1;
+        mouse.y = - ( event.clientY / height ) * 2 + 1;
+        raycaster.setFromCamera( mouse, camera );
+
+        if (points) {
+            let intersects = raycaster.intersectObject(points);
+            if (intersects.length > 0) {
+                console.log(intersects[0].index);
+            }
+        }
+    }
+
+    function getPosition() {
+        return getPositionByGeometry();
+        // return getPositionByRandomArithmetic();
+    }
+
+    function getPositionByGeometry() {
+        let vertices = new THREE.SphereGeometry(20, 4, 5).vertices;
+        let positions = new Float32Array(vertices.length * 3);
+        let vertex;
+
+        for (var i = 0, l = vertices.length; i < l; i++) {
+            vertex = vertices[i];
+            vertex.toArray(positions, i * 3);
+        }
+
+        return positions;
+    }
+
+    // u=rand2(0, 1)
+    // v=rand2(0, 1)
+    // theta = 2*PI*u
+    // phi = arccos(2*v - 1)
+    // x=sin(theta)*sin(phi)
+    // y=cos(theta)*sin(phi)
+    // z=cos(phi)
+    function getPositionByRandomArithmetic() {
+        let n = 3000;
+        let result = new Float32Array(n * 3);
+
+        for  (var i = 0; i < n; i++) {
+            getRandomPosition(i, result, 60);
+        }
+
+        return result;
+    }
+
+    function getRandomPosition(i, float32Array, radius = 10) {
+        let u = Math.random();
+        let v = Math.random();
+        let theta = 2 * Math.PI * u;
+        let phi = Math.acos(2 * v - 1);
+        let x = Math.sin(theta) * Math.sin(phi);
+        let y = Math.cos(theta) * Math.sin(phi);
+        let z = Math.cos(phi);
+
+        float32Array[i * 3] = x * radius;
+        float32Array[i * 3 + 1] = y * radius;
+        float32Array[i * 3 + 2] = z * radius;
+    }
+
+    // also can write buffer;
+    function typeArrayConcat(first, second) {
+        let first_length = first.length;
+        let result = new Float32Array(first_length + second.length);
+        result.set(first);
+        result.set(second, first_length);
+
+        return result;
+    }
+
+</script>
+</html>

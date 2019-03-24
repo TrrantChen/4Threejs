@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>星球雏形</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+        body {
+            font-family: Monospace;
+            background-color: #000;
+            margin: 0px;
+            overflow: hidden;
+        }
+
+        a {
+            color: #f80;
+        }
+    </style>
+</head>
+
+<body>
+
+<script src="../build/three.js"></script>
+<script src="../build/Tween.js"></script>
+<script src="../js/90/OrbitControls.js"></script>
+<script src="../js/shaders/CopyShader.js"></script>
+<script src="../js/shaders/ConvolutionShader.js"></script>
+<script src="../js/shaders/ThresholdShader.js"></script>
+<script src="../js/shaders/VignetteShader.js"></script>
+
+<script src="../js/postprocessing/EffectComposer.js"></script>
+<script src="../js/postprocessing/MaskPass.js"></script>
+<script src="../js/postprocessing/RenderPass.js"></script>
+<script src="../js/postprocessing/ShaderPass.js"></script>
+<script src="../js/postprocessing/BloomPass.js"></script>
+
+
+
+<script>
+    var container;
+    var camera, scene, renderer, controls;
+    var depthMaterial, depthTarget, composer, ssao, fxaa, ico;
+    var has_gl = false;
+
+    var delta;
+    var time;
+    var oldTime;
+
+    var effectThreshold;
+    var materialDepth;
+    var thresholdTarget;
+    var depthScale = 1.0;
+
+    var meshes = [];
+    var target = new THREE.Vector3(0, 0, 0);
+    init();
+    animate();
+
+    function init() {
+
+        sceneBackground(); //scene背景
+        scene.fog = new THREE.Fog(scene.background, 500, 1200);
+        camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 10000);
+        camera.position.set(0, 400, -500);
+        camera.lookAt(scene.position);
+        scene.add(camera);
+
+        renderScene()
+        // addPlane(); //添加地面
+        addIco(); //中间的20面体
+        addPointCloud(); //添加小球
+        addqiu(50); //小行星数量
+        controls(); //orbit控制器
+        postprocessing(); // 后期处理模块
+
+    }
+
+    function sceneBackground() {//这里可以用普通背景或者天空盒子作为场景的背景
+        scene = new THREE.Scene();
+        var path = '../images/background/cosmos/'; //宇宙顺序有问题，
+        format = '.jpg';
+        new THREE.CubeTextureLoader().load([
+            path + 'Dark-Nebula-Left-TEX' + format, path + 'Dark-Nebula-Right-TEX' + format,
+            path + 'Dark-Nebula-Top-TEX' + format, path + 'Dark-Nebula-Bottom-TEX' + format,
+            path + 'Dark-Nebula-Front-TEX' + format, path + 'Dark-Nebula-Back-TEX' + format
+        ], function (res) {
+            scene.background = res;
+        });
+    }
+
+    function renderScene() {
+        renderer = new THREE.WebGLRenderer({
+            antialias: true
+        });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+        window.addEventListener('resize', onWindowResize, false);
+
+    }
+
+    function controls() {//orb控件
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.target = target;
+        // controls.autoRotate=true;
+        // controls.autoRotateSpeed=0.5;
+    }
+
+    function addPlane() {
+
+        var plane = new THREE.PlaneGeometry(1000, 1000);
+        var material = new THREE.MeshBasicMaterial({
+            color: 0x000000
+        });
+        var floor = new THREE.Mesh(plane, material);
+        floor.rotation.x = -Math.PI / 2;
+        scene.add(floor);
+    }
+
+
+    function addIco() {
+
+        ico = new THREE.SphereBufferGeometry(80, 60, 30);
+        for (var i = 0; i < ico.length; i++) {
+
+            if (ico[i].y < 0) {
+                ico[i].y = 0;
+                if (ico[i].length() < 78) {
+                    ico[i].y = -1;
+                };
+            }
+        }
+
+        // 球体
+        var material = new THREE.MeshBasicMaterial({
+            color: 0x0000ff
+        });
+        var mesh = new THREE.Mesh(ico, material);
+        mesh.scale.set(0.98, 0.98, 0.98);
+        scene.add(mesh);
+
+        // 球上面线框显示的材质
+        var material = new THREE.MeshBasicMaterial({
+            color: 0xff44ff,
+            wireframe: true
+        });
+        var mesh = new THREE.Mesh(ico, material);
+        scene.add(mesh);
+
+        // TorusGeometry( radius, tube, radialSegments, tubularSegments, arc )
+        var material = new THREE.MeshBasicMaterial({
+            color: 0xffffff,
+            wireframe: false,
+            side: THREE.DoubleSide
+        });
+
+        for (var i = 0; i < 50; i++) {
+            var radius = 100 + i * 10;
+            var length = 1 + Math.random() * 3;
+            var segments = Math.floor(((radius * 0.1) * length));
+            var segment = new THREE.TorusGeometry(radius, 1, 4, segments, length);
+            segment.applyMatrix(new THREE.Matrix4().setPosition(new THREE.Vector3(0, 0, -1)));
+
+            var material = new THREE.MeshBasicMaterial({
+                color: 0xffffff,
+                wireframe: false,
+                side: THREE.DoubleSide
+            });
+            material.color.setHSL(0.7 + Math.random() * 0.25, 1, 0.58);
+
+            var mesh = new THREE.Mesh(segment, material);
+
+            mesh.rotation.z = Math.random() * (Math.PI * 2);
+            mesh.rotation.x = Math.PI * 0.5;
+            mesh.position.y = 1;
+            if (i > 40) {
+                mesh.position.y = 1 + (i - 40) * 10;
+            }
+            scene.add(mesh);
+            mesh.userData.extraRotation = 0;
+            meshes.push({
+                mesh: mesh,
+                speed: Math.random() * 2 - 1
+            });
+
+        }
+
+
+    }
+
+
+    function addPointCloud() {
+
+        var textureLoader = new THREE.TextureLoader();
+
+        var map = textureLoader.load("../textures/ball.png");
+
+        var pMaterial = new THREE.PointsMaterial({
+            color: 0xff44ff,
+            size: 5,
+            //blending: THREE.AdditiveBlending,
+            transparent: true,
+            //sizeAttenuation: false
+            map: map,
+            alphaTest: 0.1
+
+        });
+
+        // create the particle system
+        pointCloud = new THREE.Points(ico, pMaterial);
+        scene.add(pointCloud);
+    }
+
+    function addqiu(num) {
+        var geometry = new THREE.SphereBufferGeometry(7, 10, 10);
+        var textureLoader = new THREE.TextureLoader();
+        var map = textureLoader.load("../textures/ball.png");
+        for (var i = 0; i < num; i++) {
+            var object = new THREE.Mesh(geometry, new THREE.PointsMaterial({
+                color: Math.random() * 0xffffff,
+                size: 5,
+                transparent: true,
+                map: map,
+                alphaTest: 0.1
+
+            }));
+            object.position.x = Math.random() * 800 - 400;
+            object.position.y = Math.random() * 100 - 50;
+            object.position.z = Math.random() * 800 - 400;
+            // object.rotation.x = Math.random() * 2 * Math.PI;
+            // object.rotation.y = Math.random() * 2 * Math.PI;
+            // object.rotation.z = Math.random() * 2 * Math.PI;
+            object.scale.x = Math.random() + 0.5;
+            object.scale.y = Math.random() + 0.5;
+            object.scale.z = Math.random() + 0.5;
+            scene.add(object);
+        }
+
+    }
+
+    function postprocessing() {
+
+        renderer.autoClear = false;
+        var parameters = {
+            minFilter: THREE.LinearFilter,
+            magFilter: THREE.LinearFilter,
+            format: THREE.RGBFormat
+        };
+        thresholdTarget = new THREE.WebGLRenderTarget(window.innerWidth * depthScale, window.innerHeight * depthScale,
+            parameters);
+
+        // postprocessing
+        //THREE.RenderPass = function ( scene, camera, overrideMaterial, clearColor, clearAlpha ) {
+        var renderModel = new THREE.RenderPass(scene, camera);
+        effectThreshold = new THREE.ShaderPass(THREE.ThresholdShader);
+        effectThreshold.uniforms["tMap"].value = thresholdTarget.texture;
+        effectThreshold.uniforms["threshold"].value = 0.2;
+        effectThreshold.uniforms["expo"].value = 7.0;
+
+        //var effectBarrelBlur = new THREE.ShaderPass( THREE.BarrelBlurShader );
+        var effectBloom = new THREE.BloomPass(0.6);
+
+        var effectVignette = new THREE.ShaderPass(THREE.VignetteShader);
+        effectVignette.uniforms["offset"].value = 1.2;
+        effectVignette.uniforms["darkness"].value = 1.4;
+        effectVignette.renderToScreen = true;
+
+        //var effectCopy = new THREE.ShaderPass( THREE.CopyShader );
+        //effectCopy.renderToScreen = true;
+
+        composer = new THREE.EffectComposer(renderer);
+
+        composer.addPass(renderModel);
+        composer.addPass(effectThreshold);
+        composer.addPass(effectBloom);
+        composer.addPass(effectVignette);
+        //composer.addPass( effectCopy );
+    }
+
+    function jump() {
+
+        var mesh = meshes[Math.floor(Math.random() * meshes.length)].mesh;
+
+        if (mesh.userData.isTweeing) {
+            return;
+        }
+
+        mesh.userData.isTweeing = true;
+
+        var value = Math.random();
+
+        var inTween = new TWEEN.Tween(mesh.scale)
+            .to({
+                z: value * 1
+            }, 300)
+            .easing(TWEEN.Easing.Cubic.Out)
+
+        var outTween = new TWEEN.Tween(mesh.scale)
+            .to({
+                // x:0.1,
+                z: 1
+            }, 1000)
+            .easing(TWEEN.Easing.Cubic.In)
+            .onComplete(function () {
+                mesh.userData.isTweeing = false;
+            });
+        inTween.chain(outTween);
+        inTween.start();
+
+        var inTween = new TWEEN.Tween(mesh.userData)
+            .to({
+                extraRotation: value * 0.025
+            }, 300)
+            .easing(TWEEN.Easing.Cubic.Out)
+
+        var outTween = new TWEEN.Tween(mesh.userData)
+            .to({
+                extraRotation: 0
+            }, 1000)
+            .easing(TWEEN.Easing.Cubic.In)
+        inTween.chain(outTween);
+        inTween.start();
+
+
+    }
+
+    function onWindowResize(event) {
+
+        var width = window.innerWidth;
+        var height = window.innerHeight;
+
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+        renderer.setSize(width, height);
+
+        //fxaa.uniforms[ 'resolution' ].value.set( 1 / width, 1 / height );
+        //ssao.uniforms[ 'size' ].value.set( width, height );
+
+        //var pixelRatio = renderer.getPixelRatio();
+        //var newWidth  = Math.floor( width / pixelRatio ) || 1;
+        //var newHeight = Math.floor( height / pixelRatio ) || 1;
+        //depthTarget.setSize( newWidth, newHeight );
+        composer.setSize(width, height);
+
+    }
+
+
+    function animate() {
+
+        requestAnimationFrame(animate);
+
+        time = Date.now();
+        delta = time - oldTime;
+        oldTime = time;
+
+        if (isNaN(delta) || delta > 1000 || delta == 0) {
+            delta = 1000 / 60;
+        }
+
+        TWEEN.update();
+        var dist = 400 + Math.sin(time * 0.0002) * 10;
+        camera.position.x = Math.sin(time * 0.0007) * dist;
+        camera.position.z = Math.cos(time * 0.0007) * dist;
+        camera.position.y = 250 + Math.cos(time * 0.0012) * 100;
+
+        camera.lookAt(scene.position);
+
+        camera.up.x = Math.sin(time * 0.0001) * 0.06;
+        // camera.up.z = Math.cos(time * 0.00015) * 0.4;
+        if (controls) {
+            controls.update();
+        }
+
+
+        for (var i = 0; i < meshes.length; i++) {
+            meshes[i].mesh.rotation.z += (meshes[i].speed * 0.001 + meshes[i].mesh.userData.extraRotation * 0.03) * delta;
+        }
+
+        if (Math.random() < 0.2) {
+            jump(); //吐温动画
+        }
+
+
+        //renderer.render( scene, camera );
+
+        renderer.clear();
+        renderer.render(scene, camera, thresholdTarget, true);
+        composer.render();
+
+
+    }
+</script>
+
+</body>
+
+</html>

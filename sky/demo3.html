@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>threejs之Sprite</title>
+    <script src="../three/three.js"></script>
+</head>
+
+<body>
+
+<canvas id="cc"></canvas>
+
+<script type="text/javascript">
+
+    // 创建一个场景，它将保存我们所有的元素，如物体、照相机和灯光。
+    var scene = new THREE.Scene();
+
+    // 创建一个摄像机，它定义了我们所处的位置.
+    var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+    // 创建渲染并设置大小 指定渲染canvas对象
+    var renderer = new THREE.WebGLRenderer({
+        canvas: document.querySelector("#cc")//渲染器绘制其输出的画布，
+
+    });
+
+    renderer.setClearColor(0xEEEEEE);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    //创建一个xyz坐标轴，方便初学者理解三维坐标
+    var axes = new THREE.AxesHelper(20);
+    scene.add(axes);
+
+    scene.add(new THREE.DirectionalLight( 0xffffff, 0.5 ))
+    //创建网格模型
+    var box = new THREE.Mesh(new THREE.DodecahedronBufferGeometry(2, 1),new THREE.MeshLambertMaterial({color:Math.random()*0xffffff}))
+
+    scene.add(box)
+    box.position.set(0,20,0)
+
+    var sprite = createSpriteText()//创建出我们的精灵。精灵拥有万向锁。永远朝向屏幕。这就是他的优势。
+
+    scene.add(sprite)
+
+
+
+    //我们的网格模型就搞成了。
+
+
+    //设置相机位置
+    camera.position.x = -30;
+    camera.position.y = 40;
+    camera.position.z = 30;
+    camera.lookAt(scene.position);
+
+    // 执行一次渲染器，GPU渲染成图像，绘制到canvas里面呈现
+
+    let Rs = 50//半径
+    let Ry = 60//高度值
+    let detils = 1//角度值
+    const draw = function(){
+        requestAnimationFrame(draw)//不断绘制
+        renderer.render(scene, camera);//渲染
+        detils++
+        camera.position.set(Math.cos(Math.PI/180*detils)*Rs,Ry,Math.sin(Math.PI/180*detils)*Rs)//cos控制相机 x轴运动，sin控制相机z轴运动，y轴高度值不变。这便是著名的相对运动抽离
+        camera.lookAt(0,0,0);
+        //sprite.rotation.y+=0.01//网格模型旋转
+    }
+    draw()
+
+
+    function createSpriteShape(){
+        /*1、创建一个画布，记得设置画布的宽高，否则将使用默认宽高，有可能会导致图像显示变形*/
+        let canvas = document.createElement("canvas");
+        canvas.width = 120;
+        canvas.height = 120;
+        /*2、创建图形，这部分可以去看w3c canvas教程*/
+        let ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#ff0000";
+        ctx.arc(50,50,50,0,2*Math.PI);
+        ctx.fill();
+        /*3、将canvas作为纹理，创建Sprite*/
+        let texture = new THREE.Texture(canvas);
+        texture.needsUpdate = true; //注意这句不能少
+        let material = new THREE.SpriteMaterial({map:texture});
+        let mesh = new THREE.Sprite(material);
+        /*4、放大图片，每个精灵有自己的大小，默认情况下都是很小的，如果你不放大，基本是看不到的*/
+
+        return mesh;
+    }
+
+    function createSpriteText(){
+        //先用画布将文字画出
+        let canvas = document.createElement("canvas");
+        let ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#ffff00";
+        ctx.font = "Bold 100px Arial";
+        ctx.lineWidth = 4;
+        ctx.fillText("123",4,104);
+        let texture = new THREE.Texture(canvas);
+        texture.needsUpdate = true;
+
+        //使用Sprite显示文字
+        let material = new THREE.SpriteMaterial({map:texture});//通过动态canvas也就是说我们能再three里面自己随意写2d字体。动态更新文字等等功能
+        let textObj = new THREE.Sprite(material);
+
+        textObj.scale.set(10,5,1);
+        return textObj;
+    }
+</script>
+</body>
+
+</html>

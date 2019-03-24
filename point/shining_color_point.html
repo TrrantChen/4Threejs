@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            margin: 0;
+            height: 100%;
+        }
+
+        canvas {
+            display: block;
+        }
+
+
+        #main {
+            border: solid 1px black;
+        }
+    </style>
+</head>
+<body>
+<div style="background: green;width: 100%;height: 100%;">
+    <canvas id="main" style="background: rgba(255,255,255,0); width: 100%; height: 100%;"></canvas>
+</div>
+</body>
+<script src="../three/WebGL.js"></script>
+<script src="../three/three.js"></script>
+<script src="../three/stats.min.js"></script>
+<script src="../three/OrbitControls.js"></script>
+<script src="../three/dat.gui.min.js"></script>
+<script src="../three/STLLoader.js"></script>
+<script type="x-shader/x-vertex" id="vertexshader">
+                attribute float size;
+                attribute vec3 customColor;
+                varying vec3 vColor;
+                void main() {
+                    vColor = customColor;
+                    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+                    gl_PointSize = size * ( 300.0 / -mvPosition.z );
+                    gl_Position = projectionMatrix * mvPosition;
+                }
+            </script>
+<script type="x-shader/x-fragment" id="fragmentshader">
+                uniform vec3 color;
+                uniform sampler2D texture;
+                varying vec3 vColor;
+                void main() {
+                    gl_FragColor = vec4( color * vColor, 1.0 );
+                    gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
+                    if ( gl_FragColor.a < ALPHATEST ) discard;
+                }
+            </script>
+<script>
+	class MyThree {
+        data = void 0;
+        w = window.innerWidth;
+        h = window.innerHeight;
+        dom = void 0;
+
+        renderer = void 0;
+        scene = void 0;
+        camera = void 0;
+        // animate
+        clock = new THREE.Clock();
+        // event
+        raycaster = new THREE.Raycaster();
+        mouse = new THREE.Vector2();
+        mouse_down_handle = void 0;
+        // control
+        controls = void 0;
+        // test
+        is_test = true;
+        state = void 0;
+        test_control = {
+            is_enable_animate: true,
+            is_enable_event: true,
+        };
+
+        // mesh
+        mesh = void 0;
+        points = void 0;
+        positions = void 0;
+
+        constructor(dom, data) {
+            this.data =data;
+            this.dom = dom;
+            this.init();
+            this.animate();
+        }
+
+        init() {
+            this.initCanvas();
+            this.initRenderer();
+            this.initScene();
+            this.initCamera();
+            this.initControls();
+
+            if (this.is_test) {
+                this.initTest();
+            }
+
+            this.initMesh();
+            this.addEvent();
+        }
+
+        initCanvas() {
+            this.dom.style.width = this.w + 'px';
+            this.dom.style.height = this.h + 'px';
+        }
+
+        initRenderer() {
+            if (this.renderer === void 0) {
+                this.renderer = new THREE.WebGLRenderer({
+                    canvas: this.dom,
+                    // 在 css 中设置背景色透明显示渐变色
+                    alpha: true,
+                    // 开启抗锯齿
+                    antialias: true
+                });
+
+                // 这句要加，否则镜头会发虚
+                this.renderer.setSize(this.w, this.h);
+            }
+        }
+
+        initScene() {
+            if (this.scene === void 0) {
+                this.scene = new THREE.Scene();
+            }
+        }
+
+        initCamera() {
+            if (this.camera === void 0) {
+                this.camera = new THREE.PerspectiveCamera(45, this.w / this.h, 1, 10000);
+                this.camera.position.set(0, 0, 30);
+                this.camera.lookAt(this.scene.position);
+            }
+        }
+
+        initControls() {
+            this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+            // 使动画循环使用时阻尼或自转 意思是否有惯性
+            this.controls.enableDamping = true;
+            //动态阻尼系数 就是鼠标拖拽旋转灵敏度
+            //this.controls.dampingFactor = 0.25;
+            //是否可以缩放
+            this.controls.enableZoom = true;
+            //是否自动旋转
+            this.controls.autoRotate = false;
+            //设置相机距离原点的最远距离
+            this.controls.minDistance = 20;
+            //设置相机距离原点的最远距离
+            this.controls.maxDistance = 10000;
+            //是否开启右键拖拽 手机上可以禁止拖拽中心
+            this.controls.enablePan = false;
+        }
+
+        initTest() {
+            this.initAxes();
+            this.initState();
+            this.initGui();
+        }
+
+        initAxes() {
+            //轴辅助 （每一个轴的长度）
+            let axes = new THREE.AxesHelper(500);
+            this.scene.add(axes);
+        }
+
+        initState() {
+            this.stats = new Stats();
+            this.stats.dom.style.position = 'absolute';
+            this.stats.dom.style.top = '0px';
+            document.body.appendChild(this.stats.dom);
+        }
+
+        initGui() {
+            let gui = new dat.GUI();
+            gui.add(this.test_control, 'is_enable_animate').onChange((value) => {
+                console.log(value);
+            });
+            gui.add(this.test_control, 'is_enable_event').onChange((value) => {
+                console.log(value);
+            });
+        }
+
+        initMesh() {
+            this.createOnePointByPointMaterial();
+        }
+
+        createOnePointByPointMaterial() {
+            let count = 1;
+            let positions = this.getPositions(count,[{
+                x: 1,
+                y: 1,
+                z: 1,
+            }]);
+            let colors = this.getColors(count, {
+                r: 1,
+                g: 1,
+                b: 1,
+            });
+
+            let sizes = this.getSizes(count, 10);
+
+            let geometry = this.createGeometry(positions, colors, [
+                {
+                    name: 'customColor',
+                    arr: colors,
+                    item_size: 1,
+                },
+                {
+                    name: 'size',
+                    arr: sizes,
+                    item_size: 1,
+                }]);
+
+            let matirial = this.createMaterial({
+                // material_type: 'shader',
+                // texture: this.getShiningCircle(),
+                texture: this.anotherSprite(),
+            });
+
+            this.points = new THREE.Points(geometry, matirial);
+            this.scene.add(this.points);
+        }
+
+        createGeometry(positions, colors, customs) {
+            let geometry = new THREE.BufferGeometry();
+            geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.addAttribute('color', new THREE.BufferAttribute(colors, 1));
+
+            if (customs) {
+                for (var custom of customs) {
+                    geometry.addAttribute(custom.name, new THREE.BufferAttribute(custom.arr, custom.item_size));
+                }
+            }
+
+            return geometry;
+        }
+
+        getColors(count, obj) {
+            let tmp = [];
+
+            for (var i = 0; i < count; i++) {
+                tmp.push(obj.r);
+                tmp.push(obj.g);
+                tmp.push(obj.b);
+            }
+
+            let colors = new Float32Array(tmp);
+
+            return colors;
+        }
+
+        getPositions(count, vertices) {
+            let arr = [];
+
+            for (var i = 0; i < count; i++) {
+                let vertice = vertices[i];
+                arr.push(vertice.x);
+                arr.push(vertice.y);
+                arr.push(vertice.z);
+            }
+
+            let positions = new Float32Array(arr);
+            return positions;
+        }
+
+        getSizes(count, size) {
+            let arr = [];
+
+            for (var i = 0; i < count; i++) {
+                arr.push(size)
+            }
+
+            let sizes = new Float32Array(arr);
+            return sizes;
+        }
+
+        createMaterial(obj) {
+            let default_obj = {
+                texture: this.getCircle(),
+                size: 10,
+                color: 0xffffff,
+                material_type: 'Point',
+            };
+            let current_obj = obj === void 0 ? default_obj : Object.assign(default_obj, obj) ;
+
+            let material = void 0;
+
+            if (current_obj.material_type === 'shader') {
+                let vertexshader = `
+                    attribute float size;
+                    varying vec3 vColor;
+                    void main() {
+                        vColor = color;
+                        vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+                        gl_PointSize = size * ( 300.0 / -mvPosition.z );
+                        gl_Position = projectionMatrix * mvPosition;
+                    }
+                `;
+
+                let fragmentshader = `
+                    uniform sampler2D texture;
+                    varying vec3 vColor;
+                    void main() {
+                        gl_FragColor = vec4( vColor, 1.0 );
+                        gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
+                    }
+                `;
+
+                material = new THREE.ShaderMaterial( {
+                    color: current_obj.color,
+                    uniforms: {
+                        color: { value: new THREE.Color(current_obj.color) },
+                        texture: {
+                            value: current_obj.texture,
+                        }
+                    },
+                    vertexShader: vertexshader,
+                    fragmentShader: fragmentshader,
+                    blending: THREE.AdditiveBlending,
+                    depthTest: false,
+                    transparent: true,
+                    vertexColors: true,
+                    side: THREE.DoubleSide,
+                } );
+            }
+            else {
+                 material = new THREE.PointsMaterial({
+                    color: current_obj.color,
+                    size: current_obj.size,
+                    opacity: 1,
+                    transparent: true,
+                    blending: THREE.AdditiveBlending,
+                    vertexColors: false,
+                    map: current_obj.texture,
+                    depthTest: false
+                });
+            }
+
+            return material;
+        }
+
+        render() {
+            this.renderer.render(this.scene, this.camera);
+        }
+
+        animate() {
+            if (this.is_test) {
+                this.stats.update();
+            }
+
+            if (this.test_control.is_enable_animate) {
+
+            }
+
+            let delta = this.clock.getDelta();
+            this.controls.update(delta);
+            this.render();
+
+            requestAnimationFrame(() => {
+                this.animate();
+            });
+
+        }
+
+        addEvent() {
+            this.mouse_down_handle = this.mouseDownHandle.bind(this);
+            this.dom.addEventListener('mousedown', this.mouse_down_handle);
+        }
+
+        mouseDownHandle(event) {
+            if (this.test_control.is_enable_event) {
+                this.mouse.x = ((event.clientX  - dom.getBoundingClientRect().left) / this.w) * 2 - 1;
+                this.mouse.y = - ((event.clientY - dom.getBoundingClientRect().top) / this.h) * 2 + 1;
+                this.raycaster.setFromCamera(this.mouse, this.camera);
+
+                if (this.points) {
+                    let intersects = this.raycaster.intersectObjects(this.points);
+                    if (intersects.length > 0) {
+                        console.log(intersects[0].index);
+                    }
+                }
+
+                if (this.mesh) {
+                    let intersects = this.raycaster.intersectObjects(this.points);
+                    if (intersects.length > 0) {
+                        console.log(intersects[0].index);
+                    }
+                }
+            }
+        }
+
+        destroy() {
+            this.dom.removeEventListener('mousedown', this.mouse_down_handle);
+        }
+
+        createCanvasMaterial(color = '#FFFFFF' , size = 256) {
+            let matCanvas = document.createElement('canvas');
+            matCanvas.width = matCanvas.height = size;
+            let matContext = matCanvas.getContext('2d');
+            // create exture object from canvas.
+            let texture = new THREE.Texture(matCanvas);
+            // Draw a circle
+            let center = size/2;
+            matContext.beginPath();
+            matContext.arc(center, center, size/2, 0, 2 * Math.PI, false);
+            matContext.closePath();
+            matContext.fillStyle = color;
+            matContext.fill();
+            // need to set needsUpdate
+            texture.needsUpdate = true;
+            // return a texture made from the canvas
+            return texture;
+        }
+
+        generateSprite() {
+            let canvas = document.createElement('canvas');
+            canvas.width = 16;
+            canvas.height = 16;
+
+            let context = canvas.getContext('2d');
+            let gradient = context.createRadialGradient(canvas.width / 2, canvas.height / 2, 0, canvas.width / 2, canvas.height / 2, canvas.width / 2);
+            gradient.addColorStop(0, 'rgba(255,255,255,1)');
+            gradient.addColorStop(0.2, 'rgba(0,255,255,1)');
+            gradient.addColorStop(0.4, 'rgba(0,0,64,1)');
+            gradient.addColorStop(1, 'rgba(0,0,0,1)');
+            context.fillStyle = gradient;
+            context.fillRect(0, 0, canvas.width, canvas.height);
+
+            let texture = new THREE.Texture(canvas);
+            texture.needsUpdate = true;
+            return texture;
+
+        }
+
+        getCircle(size = 512) {
+            let matCanvas = document.createElement('canvas');
+            matCanvas.width = matCanvas.height = size;
+            let matContext = matCanvas.getContext('2d');
+            // create exture object from canvas.
+            let texture = new THREE.Texture(matCanvas);
+            // Draw a circle
+            let center = size/2;
+            matContext.beginPath();
+            matContext.arc(center, center, size/2, 0, 2 * Math.PI, false);
+            matContext.closePath();
+            matContext.fillStyle = 'rgba(255,255,255,1)';
+            // matContext.fillStyle = 'rgba(0,0,0,1)';
+            matContext.fill();
+            // need to set needsUpdate
+            texture.needsUpdate = true;
+            // return a texture made from the canvas
+            return texture;
+        }
+
+        getShiningCircle(size = 512) {
+            let canvas = document.createElement('canvas');
+            canvas.width = canvas.height = size;
+            let ctx = canvas.getContext('2d');
+            let texture = new THREE.Texture(canvas);
+            let center = size/2;
+            ctx.beginPath();
+            ctx.arc(center, center, size/2, 0, 2 * Math.PI, false);
+            ctx.closePath();
+
+            let lg = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, 0, canvas.width / 2, canvas.height / 2, canvas.width / 2);
+            // 向圆形渐变上添加颜色
+            lg.addColorStop(0.1 , "#ff0");
+            lg.addColorStop(0.4 , "#0ff");
+            lg.addColorStop(0.8 , "#f0f");
+            // 设置使用圆形渐变作为填充颜色
+            ctx.fillStyle = lg;
+            // ctx.fillStyle = 'rgba(255,255,255,1)';
+            ctx.fill();
+
+            texture.needsUpdate = true;
+            return texture;
+        }
+
+        anotherSprite() {
+            var canvas = document.createElement('canvas');
+            canvas.width = 128;
+            canvas.height = 128;
+            let texture = new THREE.Texture(canvas);
+            var ctx = canvas.getContext('2d');
+            var gradient = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, 0, canvas.width / 2, canvas.height / 2, canvas.width / 2);
+            gradient.addColorStop(0, 'rgba(255,255,255,1)');
+            gradient.addColorStop(0.2, 'rgba(240,255,240,1)');
+            gradient.addColorStop(0.22, 'rgba(0,150,255,.2)');
+            gradient.addColorStop(1, 'rgba(0,50,255,0)');
+            ctx.fillStyle = gradient; // "#FFFFFF"; // gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            texture.needsUpdate = true;
+
+            return texture;
+        }
+    }
+
+    let dom = document.querySelector('#main');
+    let myTree = new MyThree(dom);
+
+	</script>
+</html>
+
+

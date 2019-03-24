@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>three.js webgl - interactive particles</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+        body {
+            color: #ffffff;
+            background-color: #000000;
+            margin: 0px;
+            overflow: hidden;
+        }
+        #info {
+            position: absolute;
+            top: 0px;
+            width: 100%;
+            padding: 5px;
+            font-family: Monospace;
+            font-size: 13px;
+            text-align: center;
+            font-weight: bold;
+        }
+        a {
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+<!--<div id="container" style="width: 400px; height: 300px;"></div>-->
+<div id="container"></div>
+<div style="position: absolute; top: 10px; right: 10px">
+    <span id="show"></span>
+</div>
+<div id="info"><a href="http://threejs.org" target="_blank" rel="noopener">three.js</a> webgl - interactive - particles</div>
+<script src="../three/WebGL.js"></script>
+<script src="../three/three.js"></script>
+<script src="../three/stats.min.js"></script>
+<script src="../three/OrbitControls.js"></script>
+<script src="../three/dat.gui.min.js"></script>
+<script type="x-shader/x-vertex" id="vertexshader">
+                attribute float size;
+                attribute vec3 customColor;
+                varying vec3 vColor;
+                void main() {
+                    vColor = customColor;
+                    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+                    gl_PointSize = size * ( 300.0 / -mvPosition.z );
+                    gl_Position = projectionMatrix * mvPosition;
+                }
+            </script>
+<script type="x-shader/x-fragment" id="fragmentshader">
+                uniform vec3 color;
+                uniform sampler2D texture;
+                varying vec3 vColor;
+                void main() {
+                    gl_FragColor = vec4( color * vColor, 1.0 );
+                    gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
+                    if ( gl_FragColor.a < ALPHATEST ) discard;
+                }
+            </script>
+<script>
+    var dom = document.querySelector('#container');
+    // var width = parseInt(dom.style.width);
+    // var height = parseInt(dom.style.height);
+    var width = window.innerWidth;
+    var height = window.innerHeight;
+    var show = document.querySelector('#show');
+
+    var renderer, scene, camera, stats, controls;
+    var particles;
+    var PARTICLE_SIZE = 20;
+    var raycaster, intersects;
+    var mouse, INTERSECTED;
+    init();
+    initControls();
+    animate();
+    function init() {
+        var container = document.getElementById( 'container' );
+        scene = new THREE.Scene();
+        camera = new THREE.PerspectiveCamera( 45, width / height, 1, 10000 );
+        camera.position.z = 250;
+        // //
+        // var vertices = new THREE.BoxGeometry( 200, 200, 200, 2, 2, 2 ).vertices;
+        // var positions = new Float32Array( vertices.length * 3 );
+        // var colors = new Float32Array( vertices.length * 3 );
+        // var sizes = new Float32Array( vertices.length );
+        // var vertex;
+        // var color = new THREE.Color();
+        // for ( var i = 0, l = vertices.length; i < l; i ++ ) {
+        //     vertex = vertices[ i ];
+        //     vertex.toArray( positions, i * 3 );
+        //     color.setHSL( 0.01 + 0.1 * ( i / l ), 1.0, 0.5 );
+        //     color.toArray( colors, i * 3 );
+        //     sizes[ i ] = PARTICLE_SIZE * 0.5;
+        // }
+        // var geometry = new THREE.BufferGeometry();
+        // geometry.addAttribute( 'position', new THREE.BufferAttribute( positions, 3 ) );
+        // geometry.addAttribute( 'customColor', new THREE.BufferAttribute( colors, 3 ) );
+        // geometry.addAttribute( 'color', new THREE.BufferAttribute( colors, 3 ) );
+        // geometry.addAttribute( 'size', new THREE.BufferAttribute( sizes, 1 ) );
+        // //
+        // var material = new THREE.ShaderMaterial( {
+        //     uniforms: {
+        //         color: { value: new THREE.Color( 0xffffff ) },
+        //         texture: { value: new THREE.TextureLoader().load( "../three/disc.png" ) }
+        //     },
+        //     vertexShader: document.getElementById( 'vertexshader' ).textContent,
+        //     fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
+        //     alphaTest: 0.9
+        // } );
+
+
+        let geometry = new THREE.BufferGeometry();
+        geometry.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array([10, 10, 10]), 3 ) );
+        geometry.addAttribute( 'color', new THREE.BufferAttribute(new Float32Array([1, 1, 1]), 3));
+        // geometry.addAttribute( 'customColor', new THREE.BufferAttribute(new Float32Array([1, 1, 1]), 3 ) );
+        // geometry.addAttribute( 'size', new THREE.BufferAttribute( new Float32Array([60]), 1 ) );
+
+        let material = new THREE.PointsMaterial({
+            size: 40,
+            vertexColors: true, // 是否为几何体的每个顶点应用颜色，默认值是为所有面应用材质的颜色
+            // blending: THREE.NoBlending,
+            blending: THREE.NormalBlending,
+            map: getCircle(),
+            sizeAttenuation: true,
+            opacity: 1,
+            transparent: true,
+            depthTest: false,
+        });
+
+        particles = new THREE.Points( geometry, material );
+        scene.add(particles);
+
+        //
+        renderer = new THREE.WebGLRenderer();
+        renderer.setPixelRatio( window.devicePixelRatio );
+        renderer.setSize( width, height );
+        container.appendChild( renderer.domElement );
+        //
+        raycaster = new THREE.Raycaster();
+        mouse = new THREE.Vector2();
+        //
+        stats = new Stats();
+        container.appendChild( stats.dom );
+        //
+        window.addEventListener( 'resize', onWindowResize, false );
+        // document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+        window.addEventListener( 'mousedown', onMouseDown, false);
+    }
+    function onDocumentMouseMove( event ) {
+        event.preventDefault();
+        mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+        mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+    }
+    function onMouseDown( event ) {
+        event.preventDefault();
+        mouse.x = ( (event.clientX -  dom.getBoundingClientRect().left)/ dom.offsetWidth ) * 2 - 1;
+        mouse.y = - ( (event.clientY - dom.getBoundingClientRect().top )/ dom.offsetHeight ) * 2 + 1;
+        raycaster.setFromCamera( mouse, camera );
+        intersects = raycaster.intersectObject( particles );
+
+        show.innerHTML =   mouse.x + ' ' + mouse.y + ' ' + intersects[0];
+
+        console.log(intersects);
+        console.log(mouse);
+    }
+    function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize( window.innerWidth, window.innerHeight );
+    }
+    function animate() {
+        requestAnimationFrame( animate );
+        render();
+        controls.update();
+        stats.update();
+    }
+    function render() {
+        // // particles.rotation.x += 0.0005;
+        // // particles.rotation.y += 0.001;
+        // var geometry = particles.geometry;
+        // var attributes = geometry.attributes;
+        // raycaster.setFromCamera( mouse, camera );
+        // intersects = raycaster.intersectObject( particles );
+        // if ( intersects.length > 0 ) {
+        //     if ( INTERSECTED != intersects[ 0 ].index ) {
+        //         attributes.size.array[ INTERSECTED ] = PARTICLE_SIZE;
+        //         INTERSECTED = intersects[ 0 ].index;
+        //         console.log(intersects[ 0 ].index);
+        //         attributes.size.array[ INTERSECTED ] = PARTICLE_SIZE * 1.25;
+        //         attributes.size.needsUpdate = true;
+        //     }
+        // } else if ( INTERSECTED !== null ) {
+        //     attributes.size.array[ INTERSECTED ] = PARTICLE_SIZE;
+        //     attributes.size.needsUpdate = true;
+        //     INTERSECTED = null;
+        // }
+        renderer.render( scene, camera );
+    }
+    function initControls() {
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
+        // 使动画循环使用时阻尼或自转 意思是否有惯性
+        controls.enableDamping = true;
+        //动态阻尼系数 就是鼠标拖拽旋转灵敏度
+        //controls.dampingFactor = 0.25;
+        //是否可以缩放
+        controls.enableZoom = true;
+        //是否自动旋转
+        controls.autoRotate = false;
+        //设置相机距离原点的最远距离
+        controls.minDistance = 20;
+        //设置相机距离原点的最远距离
+        controls.maxDistance = 10000;
+        //是否开启右键拖拽
+        controls.enablePan = true;
+    }
+
+    function getCircle(size = 512) {
+        var matCanvas = document.createElement('canvas');
+        matCanvas.width = matCanvas.height = size;
+        var matContext = matCanvas.getContext('2d');
+        // create exture object from canvas.
+        var texture = new THREE.Texture(matCanvas);
+        // Draw a circle
+        var center = size/2;
+        matContext.beginPath();
+        matContext.arc(center, center, size/2, 0, 2 * Math.PI, false);
+        matContext.closePath();
+        matContext.fillStyle = 'rgba(255,255,255,1)';
+        // matContext.fillStyle = 'rgba(0,0,0,1)';
+        matContext.fill();
+        // need to set needsUpdate
+        texture.needsUpdate = true;
+        // return a texture made from the canvas
+        return texture;
+    }
+</script>
+</body>
+</html>

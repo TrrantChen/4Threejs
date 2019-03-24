@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>three.js webgl - particles</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+        body {
+            background-color: #135;
+            margin: 0px;
+            font-family:Arial;
+            font-size: 16px;
+            color:#EEE;
+        }
+
+        a {
+            color:#0078ff;
+        }
+
+        #info {
+            color: #fff;
+            position: absolute;
+            top: 0px; width: 100%;
+            padding: 5px;
+            z-index: 100;
+        }
+
+        #content {
+            position: absolute;
+            width: 70%;
+            margin: 30px;
+            margin-left: 15%;
+
+        }
+    </style>
+</head>
+<body>
+    <div id="content"><b>The Aardvark-Ant Heads discuss Native Americans</b><br>
+    <i>by: Seph Reed</i>
+    <hr>
+    The following is the better part of a conversation I overheard whilst at a purportedly unnoteworthy social place on one of the less advanced and habitable planets which lie in the Aardvark-Ant Head's galaxy of origin.  For anyone who doesn't know, we call them this by their choice.  Their language is not at all phonetic, and when asked what they'd like to be called, they responded "Something unambiguous.  A name which can be immediately recognized."  So what may seem offensive to us, is actually just accurate and easy to understand.
+    <br><br>
+    Moving on.
+    <br><br>
+    So, I was at a *bar*, and I must pause again to say, they don't have bars.  For the most part, they're completely and utterly different.  But they do have places they meet, so I'm calling it a *bar*.  Similarly, the guys (things) I overheard were not named Tom and Jerry, they were named by their most noteworthy differences, which happen to be based on various body parts I don't care to explain or create an English word for.  But if you see something italicized (or starred, depending on your text renderer), the reason is that that's not *really* what they said.  It's just close enough...
+    <br><br>
+    So I was at a *bar*, and while I'd been around this solar system for long enough to be recognized in some areas, this was not one of them.  Also, I had no desire to talk that day as Aardvark-Ant Head conversation is incredibly dry and accurate and wonderful for engineering, but absolutely lacking in humor other than the kind where you laugh at them for not getting what humor is.  But even that conversation had begun to lose it's... it get's repetitive.  They don't all think alike, but they all think alike in the sense that they don't think like humans.  Anyways, I decided to play it green and rather than speaking their language when I went to the drink station (*bar*), I got out my human instruction manual and handed it to the attendant.
+    <br><br>
+    My human instruction manual was a cute little thing detailing all the most obvious things about humans.  We drink water, when we don't get it we look and act like x.  We need to ingest things of a molecular structure which is like such, but not like this or that, and without this "food" we act like y.  Don't give us the *milk*, because it'll foam up out of the mouth and blow up the stomach.  Thank god for science we learned that the easy way.
+    <br><br>
+    So I handed my instruction manual over, got some water, grabbed a couple of throw pillows to prop my head up, and lay in one of the lounge areas (yes, they have throw pillows.  Just like ours with different color and pattern preferences).  Right next to me was another *separate* lounge which was occupied, and basically the moment I got comfortable, the two *gentlemen* in it begun their interaction.  They literally wait till the exact moment you're comfortable.  Because it's *polite*.
+    <br><br>
+    He asked, "Do you speak Aardvark-Ant Head?" and I handed him my manual and made no attempt to look stupid or confused.
+    <br><br>
+    Tom: "Oh.  He's new here.  Still has his *survival guide*."<br>
+    To which his *friend* Jerry replied "Yes." a polite confirmation.<br>
+    Jerry: "We all want to meet a Human,"
+    Tom: "because of the stories,"<br>
+    Jerry: "there is a story I have heard of going from *jungles* to ice"<br>
+    Tom: "I would like to hear that story,"
+    <br><br>
+    And so began the tale of humans, jungles, and ice.
+    <br><br>
+    Jerry: "*Some oddly specific amount of time* ago, Humans were not yet sentient.  And in their *youth* they were much smaller and hairier as well"<br>
+    Tom: "Ew"<br>
+    Jerry: "Yes"  <br>
+    (Most species don't poop out of their head and arms and legs and pelvis all day long everywhere they go.  And hair is really, really similar to poop once you think about it.)<br>
+    Jerry: "They lived in *trees* and that is where they got those opposable digits you see *there*"
+    <br><br>
+    Rather than pointing, Jerry darted his eyes to my hand and back so quick I could almost hear a click.  Immediately after Tom's eyes did the same.  Super creepy looking.
+    <br><br>
+    Tom: "Yes"<br>
+    Jerry: "They also used to throw their poop and if they hit another *ape* their body would release *euphoric neurotransmitters* that often send them into convulsions which they enjoy."<br>
+    Tom: "That is utterly repulsive.  I had not been told and assume they are now grown out of it and you are telling me out of interest"  //hey Tom, pull my finger<br>
+    Jerry: "Yes"<br>
+    Tom: "Yes"  //the double yes implies relief.  An expression of theirs is "yes, yes" which is the same as "oh thank god"<br>
+    Jerry: "I'm glad you are my *friend*.  It is good to digress with another"<br>
+    Tom: "Yes"<br>
+    Jerry: "Yes"<br>
+    <br>
+    (and I thought this was kind of cute, because this is love in their world.  a tiny digression not internalized, and the mutual acceptance of one’s fascination with another subject.  definitely nothing like the whole let everything go, put a meat stick in a meat hole deal we get. Humans are absolutely repulsive once you get to see it.  You know dogs rolling around in a dead animal, so happy and innocent in their own mind and ours?  Absolutely the most astonishingly awful thing most any other species could ever imagine witnessing.  if we didn't love dogs so much, or sex, I think both would be a little less tasteful.<br>
+    But I digress.  And it *is* good to digress with another)
+    <br><br>
+    So, after a polite *thinking time* pause:<br>
+    Tom: "Continue"<br>
+    Jerry: "So, eventually the humans left their homes in the trees and started to walk amongst their predators."<br>
+    Tom: "No"<br>
+    Jerry: "Yes"<br>
+    Tom: "Yes?"<br>
+    Jerry: "Yes"
+    <br><br>
+    A little more time to think.<br>
+    Tom: "Yes"<br>
+    Jerry: "They walked amongst their predators and wandered away from their trees, we do not know why"<br>
+    Tom: "That they had safety and resources has been checked?"<br>
+    Jerry: "Yes"
+    <br><br>
+    (this is what I mean by tedious, btw.  two months of conversation like this, and it's usually not even about how great we are.)
+    <br><br>
+    A little more time to think.<br>
+    Tom: "Wow"<br>
+    Jerry: "Yes.  So they walked out of the shade, and through the middle of *savanas*"<br>
+    Tom: "Where were they going?"<br>
+    Jerry: "Towards the things they see"<br>
+    Tom: "Ohhh.  They are curious.  What reason did you not say science?"<br>
+    Jerry: "Because their science is not like ours.  They do it to test themselves for death."
+    <br><br>
+    At this point Tom was utterly in shock to be sitting about three meters away from an alien species that does crazy things purely to see whether or not it will kill them.  Granted we are a little bit... well, no.  Motorcycle over the Grand Canyon.  That's us.  I guess we don't.. most of us don't walk into a bar and shoot it up to see if we'll make it out alive.  Which is what Tom is thinking, but on a galactic scale.
+    <br><br>
+    Then, after a morbidly obese pause, the conversation begun again.  And I was grinning.  First time in a while, actually.
+    <br><br>
+    Tom: "They must run very clever experiments if they are not dead"<br>
+    Jerry: "No, they only run them when they have enough Humans to spare"
+    <br><br>
+    Conversation is basically grinding to a halt with all the *thinking time* pauses going on.  They don't continue until they either disprove a statement, find a missing piece of data, or come to believe it.
+    <br><br>
+    Tom:  “How do they choose which humans to run the experiments on?”
+    <br><br>
+    And on any other day, this would have been my queue to bust in and say “We choose ourselves Mother Fuckers.” and space jam my swaggy ass out the roof door.  But today I was lazy, and Jerry managed to do the work for me anyways.
+    <br><br>
+    Jerry: “They choose themselves.”
+    Tom: "Wow” ………………………………… ”Continue"<br>
+    Jerry: "So they walked away from trees and through savanna, into desert and over mountains, and many, many of them died."<br>
+    Tom: "Yes"<br>
+    Jerry: "And then they started to walk towards snow"<br>
+    Tom: "Because they are from the Jungle and wanted to see if they could live in snow"<br>
+    Jerry: "Yes"<br>
+    Tom: "Yes"  //finally starting to understand<br>
+    Jerry: "But the snow did not kill them, and at the same time there was an ice age"<br>
+    <br>
+    That one took him off guard.<br>
+    "No" "Yes" "Yes?" "Yes"...... "Yes"
+    <br><br>
+    Oh, and mind you, they talk faster than "No" and "Yes".  They don't even say it, really.  So they aren't quite as dry as they would be if they spoke English.  Which is true of everyone.  The only thing great about this language is it's pretty much the most insulting one ever made, which makes it perfect for describing itself.
+    <br><br>
+    Tom: "I see they lived.  And they did not walk back to their homes when the ice age came?"  //pretty clever, Tom<br>
+    Jerry: "Yes"<br>
+    Tom: "Yes"<br>
+    Jerry: "They continued walking into *Russia* (he described something thoroughly uninhabitable)"<br>
+    "And then they kept walking until they got to a frozen Ocean, and then walked across it."
+    <br><br>
+    (it took some more time for Tom to convince himself, but I'm still on the fence about that one myself)
+    <br><br>
+    Jerry: "And when they got across the ice world, they found a new home, which was more like all the places they had lived and walked than their old home had been, and there were much less predators because they were new there and had grown too smart to be hunted"<br>
+    Tom: "That is very impressive"<br>
+    Jerry: "Yes"<br>
+    Tom: "Yes"  //love birds<br>
+    Jerry: "And if you ask a Human why they do something, they will say 'for the thing at the end'"<br>
+    Tom: "What is the thing?"<br>
+    Jerry: "They don't know"<br>
+    <br>
+    And such was the story of Humans, specifically Native Americans, as told by Aardvark-Ant Head's.  They took some time to enjoy it, make sure everything made as much sense as possible, organize all the thoughts in order, and then:
+    <br><br>
+    Tom: "You tell a good story.  Did they stay in their home?"<br>
+    Jerry: "Yes.  But later others humans used a *boat* to get to the same place and destroyed the civilization of the ones which walked there and then destroyed their new home as well"
+    <br><br>
+    "No" "Yes" "Yes?" "Yes".... "Yes"
+    <br><br>
+    And while the two of them are sitting there thinking I’m some kind of hercules monster, all that’s going on in my mind is: "Pizza.  When I get back, I'm getting Pizza.  And a beer."  And eventually I did.  And I wish I could say it was the best I ever had, but I kind of jumped the gun on it at a space port.
+    <br><br>
+    Such is life.
+    <br><br>
+    <br><br>
+</div>
+</body>
+<script src="../three/three.js"></script>
+<script>
+    // if (!Detector.webgl) Detector.addGetWebGLMessage();
+
+    var container, stats;
+    var camera, scene, renderer, particles, geometry, materials = [],
+        parameters, i, h, color, size;
+    var mouseX = 0,
+        mouseY = 0;
+
+    var windowHalfX = window.innerWidth / 2;
+    var windowHalfY = window.innerHeight / 2;
+
+    init();
+    animate();
+
+    function init() {
+
+        container = document.createElement('div');
+        container.style.position = "fixed";
+        container.style.zIndex = -1;
+        document.body.appendChild(container);
+
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 2000);
+        camera.position.z = 1000;
+
+        scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x000000, 0.0007);
+
+        geometry = new THREE.Geometry();
+
+        //geometry = THREE.SphereGeometry( 1, 2, 2 );
+
+        for (i = 0; i < 100; i++) {
+
+            var vertex = new THREE.Vector3();
+            vertex.x = Math.random() * 2000 - 1000;
+            vertex.y = Math.random() * 2000 - 1000;
+            vertex.z = Math.random() * 2000 - 1000;
+
+            geometry.vertices.push(vertex);
+
+        }
+
+        parameters = [
+            [
+                [1, 1, 0.5], 5
+            ],
+            [
+                [0.95, 1, 0.5], 4
+            ],
+            [
+                [0.90, 1, 0.5], 3
+            ],
+            [
+                [0.85, 1, 0.5], 2
+            ],
+            [
+                [0.80, 1, 0.5], 1
+            ]
+        ];
+
+        /*parameters = [
+           [
+             [1, 0.5, 0.9], 0.5
+           ],
+           [
+             [0.95, 0.5, 0.9], 0.4
+           ],
+           [
+             [0.90, 0.5, 0.9], 0.3
+           ],
+           [
+             [0.85, 0.5, 0.9], 0.2
+           ],
+           [
+             [0.80, 0.5, 0.9], 0.1
+           ]
+         ];*/
+
+        for (i = 0; i < parameters.length; i++) {
+
+            color = parameters[i][0];
+            size = parameters[i][1];
+
+            materials[i] = new THREE.PointsMaterial({
+                size: size
+            });
+
+            particles = new THREE.Points(geometry, materials[i]);
+
+            particles.rotation.x = Math.random() * 6;
+            particles.rotation.y = Math.random() * 6;
+            particles.rotation.z = Math.random() * 6;
+
+            scene.add(particles);
+
+        }
+
+        renderer = new THREE.WebGLRenderer();
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        container.appendChild(renderer.domElement);
+
+        // stats = new Stats();
+        // stats.domElement.style.position = 'absolute';
+        // stats.domElement.style.top = '0px';
+        // container.appendChild(stats.domElement);
+
+        document.addEventListener('mousemove', onDocumentMouseMove, false);
+        document.addEventListener('touchstart', onDocumentTouchStart, false);
+        document.addEventListener('touchmove', onDocumentTouchMove, false);
+
+        //
+
+        window.addEventListener('resize', onWindowResize, false);
+
+    }
+
+    function onWindowResize() {
+
+        windowHalfX = window.innerWidth / 2;
+        windowHalfY = window.innerHeight / 2;
+
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+    }
+
+    function onDocumentMouseMove(event) {
+
+        mouseX = event.clientX - windowHalfX;
+        mouseY = event.clientY - windowHalfY;
+
+    }
+
+    function onDocumentTouchStart(event) {
+
+        if (event.touches.length === 1) {
+
+            // event.preventDefault();
+
+            mouseX = event.touches[0].pageX - windowHalfX;
+            mouseY = event.touches[0].pageY - windowHalfY;
+
+        }
+
+    }
+
+    function onDocumentTouchMove(event) {
+
+        if (event.touches.length === 1) {
+
+            // event.preventDefault();
+
+            mouseX = event.touches[0].pageX - windowHalfX;
+            mouseY = event.touches[0].pageY - windowHalfY;
+
+        }
+
+    }
+
+    //
+
+    function animate() {
+
+        requestAnimationFrame(animate);
+        render();
+    }
+
+    function render() {
+
+        var time = Date.now() * 0.00005;
+
+        camera.position.x += (mouseX - camera.position.x) * 0.05;
+        camera.position.y += (-mouseY - camera.position.y) * 0.05;
+
+        camera.lookAt(scene.position);
+
+        for (i = 0; i < scene.children.length; i++) {
+
+            var object = scene.children[i];
+
+            if (object instanceof THREE.Points) {
+
+                object.rotation.y = time * (i < 4 ? i + 1 : -(i + 1));
+
+            }
+
+        }
+
+        /*for (i = 0; i < materials.length; i++) {
+
+          color = parameters[i][0];
+
+          h = (360 * (color[0] + time) % 360) / 360;
+          materials[i].color.setHSL(h, color[1], color[2]);
+
+        }*/
+
+        renderer.render(scene, camera);
+
+    }
+</script>
+</html>

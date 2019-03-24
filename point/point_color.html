@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            margin: 0;
+            height: 100%;
+        }
+
+        canvas {
+            display: block;
+        }
+
+
+        #main {
+            /*width: 1920px;*/
+            /*height: 1080px;*/
+            border: solid 1px black;
+        }
+    </style>
+</head>
+<body>
+<canvas id="main"></canvas>
+<button onclick="changeColor(event)">change color</button>
+<button onclick="recover(event)">recover</button>
+<button onclick="enableEvent(event)">enable event</button>
+<button onclick="enableAnimate(event)">enable event</button>
+</body>
+<script src="../three/WebGL.js"></script>
+<script src="../three/three.js"></script>
+<script src="../three/stats.min.js"></script>
+<script src="../three/OrbitControls.js"></script>
+<script src="../three/dat.gui.min.js"></script>
+<script src="../three/STLLoader.js"></script>
+<script type="x-shader/x-vertex" id="vertexshader">
+                attribute float size;
+                attribute vec3 customColor;
+                varying vec3 vColor;
+                void main() {
+                    vColor = customColor;
+                    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+                    gl_PointSize = size * ( 300.0 / -mvPosition.z );
+                    gl_Position = projectionMatrix * mvPosition;
+                }
+            </script>
+<script type="x-shader/x-fragment" id="fragmentshader">
+                uniform vec3 color;
+                uniform sampler2D texture;
+                varying vec3 vColor;
+                void main() {
+                    gl_FragColor = vec4( color * vColor, 1.0 );
+                    gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
+                    if ( gl_FragColor.a < ALPHATEST ) discard;
+                }
+            </script>
+<script>
+    let is_enable_event = true;
+	let is_animate = true;
+    let main = void 0;
+    let renderer = void 0;
+    let scene = void 0;
+    let camera = void 0;
+    let controls = void 0;
+    let width = 1000;
+    let height = 800;
+    let cube = void 0;
+    let points = void 0;
+    let raycaster = new THREE.Raycaster();
+    let mouse = new THREE.Vector2();
+    let clock = new THREE.Clock();
+
+    function init() {
+        initCanvas();
+        initRenderer();
+        initScene();
+        initAxes();
+        initCamera();
+        initControls();
+        initMesh();
+
+        animate();
+        addEvent();
+    }
+
+    function initCanvas() {
+        main = document.querySelector('#main');
+        main.style.width = width + 'px';
+        main.style.height = height + 'px';
+    }
+
+    function initRenderer() {
+        if (renderer === void 0) {
+            renderer = new THREE.WebGLRenderer({
+                canvas: main,
+                // 在 css 中设置背景色透明显示渐变色
+                alpha: true,
+                // 开启抗锯齿
+                antialias: false
+            });
+
+            // 这句要加，否则镜头会发虚
+            renderer.setSize(width, height);
+            // renderer.setClearColor(0x000000);
+            renderer.setClearColor(0xffffff);
+        }
+    }
+
+    function render() {
+        renderer.render(scene, camera);
+    }
+
+    function initScene() {
+        if (scene === void 0) {
+            scene = new THREE.Scene();
+        }
+    }
+
+    function initCamera() {
+        if (camera === void 0) {
+            camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000);
+            camera.position.set(0, 0, 30);
+            camera.lookAt(scene.position);
+        }
+    }
+
+    // 添加辅助轴
+    function initAxes() {
+        //轴辅助 （每一个轴的长度）
+        let axes = new THREE.AxesHelper(500);
+        scene.add(axes);
+    }
+
+    function initMesh() {
+        let vertices = new THREE.SphereGeometry(20, 4, 4).vertices;
+        let positions = new Float32Array(vertices.length * 3);
+        let colors = new Float32Array(vertices.length * 3);
+        let sizes = new Float32Array(vertices.length * 3);
+        let custom_attribute = new Float32Array(vertices.length);
+
+        let vertex;
+        let color = new THREE.Color();
+
+        for (var i = 0, l = vertices.length; i < l; i++) {
+            vertex = vertices[i];
+            vertex.toArray(positions, i * 3);
+
+            if (i % 2 === 0) {
+                color = new THREE.Color(0xcf002f);
+            }
+            else {
+                // color.setHSL(0.01 + 0.1 * (i / l), 1.0, 0.5);
+                color = new THREE.Color(0x1994d5);
+            }
+
+
+            color.toArray(colors, i * 3);
+            sizes[i] = 5;
+            custom_attribute[i] = i + 0.1;
+        }
+
+        let geometry = new THREE.BufferGeometry();
+        geometry.addAttribute( 'position', new THREE.BufferAttribute( positions, 3 ) );
+        geometry.addAttribute( 'custom_attribute', new THREE.BufferAttribute( custom_attribute, 1 ) );
+        geometry.addAttribute( 'color', new THREE.BufferAttribute( colors, 3 ) );
+
+        let material = new THREE.PointsMaterial({
+            size: 20,
+                vertexColors: true, // 是否为几何体的每个顶点应用颜色，默认值是为所有面应用材质的颜色
+                // blending: THREE.NoBlending,
+                blending: THREE.NormalBlending,
+                map: getCircle(),
+                sizeAttenuation: true,
+                opacity: 1,
+                transparent: true,
+                depthTest: false,
+        });
+        particles = new THREE.Points( geometry, material );
+
+        scene.add(particles);
+    }
+
+    function initControls() {
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
+        // 使动画循环使用时阻尼或自转 意思是否有惯性
+        controls.enableDamping = true;
+        //动态阻尼系数 就是鼠标拖拽旋转灵敏度
+        //controls.dampingFactor = 0.25;
+        //是否可以缩放
+        controls.enableZoom = true;
+        //是否自动旋转
+        controls.autoRotate = false;
+        //设置相机距离原点的最远距离
+        controls.minDistance = 20;
+        //设置相机距离原点的最远距离
+        controls.maxDistance = 10000;
+        //是否开启右键拖拽
+        controls.enablePan = true;
+    }
+
+    function animate() {
+
+        if (points && is_animate) {
+            points.rotateZ(Math.PI/4000)
+        }
+
+        let delta = clock.getDelta();
+        controls.update(delta);
+        render();
+        requestAnimationFrame(animate);
+    }
+
+    function createCanvasMaterial(color = '#FFFFFF' , size = 256) {
+        var matCanvas = document.createElement('canvas');
+        matCanvas.width = matCanvas.height = size;
+        var matContext = matCanvas.getContext('2d');
+        // create exture object from canvas.
+        var texture = new THREE.Texture(matCanvas);
+        // Draw a circle
+        var center = size/2;
+        matContext.beginPath();
+        matContext.arc(center, center, size/2, 0, 2 * Math.PI, false);
+        matContext.closePath();
+        matContext.fillStyle = color;
+        matContext.fill();
+        // need to set needsUpdate
+        texture.needsUpdate = true;
+        // return a texture made from the canvas
+        return texture;
+    }
+
+    function getCircle(size = 256) {
+        var matCanvas = document.createElement('canvas');
+        matCanvas.width = matCanvas.height = size;
+        var matContext = matCanvas.getContext('2d');
+        // create exture object from canvas.
+        var texture = new THREE.Texture(matCanvas);
+        // Draw a circle
+        var center = size/2;
+        matContext.beginPath();
+        matContext.arc(center, center, size/2, 0, 2 * Math.PI, false);
+        matContext.closePath();
+        matContext.fillStyle = 'rgba(255,255,255,1)';
+        // matContext.fillStyle = 'rgba(0,0,0,1)';
+        matContext.fill();
+        // need to set needsUpdate
+        texture.needsUpdate = true;
+        // return a texture made from the canvas
+        return texture;
+    }
+
+    function generateSprite() {
+
+        let canvas = document.createElement('canvas');
+        canvas.width = 16;
+        canvas.height = 16;
+
+        let context = canvas.getContext('2d');
+        let gradient = context.createRadialGradient(canvas.width / 2, canvas.height / 2, 0, canvas.width / 2, canvas.height / 2, canvas.width / 2);
+        gradient.addColorStop(0, 'rgba(255,255,255,1)');
+        gradient.addColorStop(0.2, 'rgba(0,255,255,1)');
+        gradient.addColorStop(0.4, 'rgba(0,0,64,1)');
+        gradient.addColorStop(1, 'rgba(0,0,0,1)');
+        context.fillStyle = gradient;
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        let texture = new THREE.Texture(canvas);
+        texture.needsUpdate = true;
+        return texture;
+
+    }
+
+    window.onload = function() {
+        init();
+    };
+
+    function addEvent() {
+        window.addEventListener('mouseup', onMouseUp);
+    }
+
+    function onMouseUp(event) {
+        if (is_enable_event) {
+            mouseDownPoint(event);
+        }
+    }
+
+    function mouseDownPoint(event) {
+        event.preventDefault();
+        mouse.x = ( event.clientX / width ) * 2 - 1;
+        mouse.y = - ( event.clientY / height ) * 2 + 1;
+        raycaster.setFromCamera( mouse, camera );
+
+        if (points) {
+            let intersects = raycaster.intersectObject(points);
+            if (intersects.length > 0) {
+                console.log(intersects[0].index);
+            }
+        }
+    }
+
+    function enableEvent(event) {
+        is_enable_event = !is_enable_event;
+    }
+
+	function enableAnimate(event) {
+		is_animate = !is_animate;
+	}
+
+	function changeColor(event) {
+
+        let color = new THREE.Color(0x66CDAA);
+        particles.geometry.attributes.color.array[0 * 3] = Math.random();
+        particles.geometry.attributes.color.array[0 * 3 + 1] = Math.random();
+        particles.geometry.attributes.color.array[0 * 3 + 2] = Math.random();
+        particles.geometry.attributes.color.needsUpdate = true;
+    }
+
+	</script>
+</html>
+
+

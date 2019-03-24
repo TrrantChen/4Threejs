@@ -1,0 +1,544 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>3D Morphing Experiment Using Three.js</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+        body {
+            font-family: Monospace;
+            background-color: #000;
+            color: #fff;
+            margin: 0px;
+            overflow: hidden;
+        }
+        #info {
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            text-align: center;
+            z-index: 100;
+            display:block;
+        }
+        #info a { color: #f00; font-weight: bold; text-decoration: underline; cursor: pointer }
+    </style>
+
+</head>
+<body>
+<div id="info">/ Morphing /</br>Created by <a href="http://qianqian-ye.com/" style="color: #b3ecec">Qianqian Ye</a> , Powered by <a href="https://threejs.org/examples/#webgl_buffergeometry_drawcalls" style="color: #b3ecec">Three.js</a></div>
+<button style="position:absolute;left:0px; top:10px;z-index:1000;">stop</button>
+<div id="container"></div>
+
+<script src="../three/WebGL.js"></script>
+<script src="../three/three.js"></script>
+<script src="../three/stats.min.js"></script>
+<script src="../three/OrbitControls.js"></script>
+<script src="../three/dat.gui.min.js"></script>
+<script>
+    let is_animate = true;
+    let is_print = true;
+    var _w=window.innerWidth;
+    var _h=window.innerHeight;
+    let raycaster = new THREE.Raycaster();
+    let mouse = new THREE.Vector2();
+
+
+    window.addEventListener('mousedown', (event) => {
+            event.preventDefault();
+            mouse.x = (event.clientX / _w) * 2 - 1;
+            mouse.y = -(event.clientY / _h) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            let intersects = raycaster.intersectObject(pointCloud);
+
+            console.log(intersects);
+    });
+
+    var group;
+    var container, controls, stats;
+    var particlesData = [];
+    var camera, scene, renderer;
+    var positions, colors;
+    var particles;
+    var pointCloud;
+    var particlePositions;
+    var linesMesh;
+
+    var maxParticleCount = 1500;
+    var particleCount = 1000;
+    var r = 800;
+    var rHalf = r / 2;
+
+    var anim_speed=1;
+    var anim=true;
+
+    var autoSave;
+
+    var effectController = {
+        morphing_speed:0.05,
+        animate: true,
+        showDots: true,
+        showLines: true,
+        anim_speed: 1,
+        minDistance: 60,
+        limitConnections: false,
+        maxConnections: 20,
+        particleCount: 1000
+    };
+
+    init();
+    animate();
+    initGUI();
+
+
+    var morphTarget=[];
+    var startMorph;
+    var morphStartedAt;
+    var targetShapes;
+
+    function initGUI() {
+        var gui = new dat.GUI();
+        gui.add( effectController, "limitConnections" );
+        gui.add( effectController, "showLines" ).onChange( function( value ) { linesMesh.visible = value; } );
+        gui.add( effectController, "showDots" ).onChange( function( value ) { pointCloud.visible = value; } );
+        gui.add( effectController, "minDistance", 10, 300 );
+        gui.add( effectController, "particleCount", 0, maxParticleCount, 1 ).onChange( function( value ) {
+            particleCount = parseInt( value );
+            particles.setDrawRange( 0, particleCount );
+        });
+        gui.add( effectController, "morphing_speed", 0.001, 1);
+    }
+
+    function init() {
+        // initGUI();
+        container = document.getElementById( 'container' );
+
+        camera = new THREE.PerspectiveCamera( 45, _w / _h, 1, 4000 );
+        camera.position.z = 1650;
+
+        controls = new THREE.OrbitControls( camera, container );
+        scene = new THREE.Scene();
+        group = new THREE.Group();
+        scene.add( group );
+
+        // 初始化一个矩阵，并加入group中，猜是后面整体动画变形用的。
+        // todo points 意义不明
+            var material = new THREE.MeshNormalMaterial( { color: 0x000000,transparent:true,opacity:0.5 } );
+            var octGeom = new THREE.OctahedronGeometry(600, 0);
+            var oct = new THREE.Mesh( octGeom,material ) ;
+            oct.points=[];
+        //
+
+        // 初始化一个正方体，并加入group，猜是后面整体动画变化用的。
+        // todo points意义不明
+            var boxGeom=new THREE.BoxGeometry( r/2, r/2, r/2);
+            var box =  new THREE.Mesh( boxGeom,material ) ;
+            box.points=[];
+        //
+
+        // 将正方体和矩形一起加入到targetShapes数组中
+        // todo targetShapes意义不明
+            targetShapes=[box,oct];
+        //
+
+        // 初始化helper，无需看
+            var helper = new THREE.BoxHelper( new THREE.Mesh( new THREE.BoxGeometry( r, r, r ) ) );
+            helper.material.color.setHex( 0x080808 );
+            helper.material.blending = THREE.AdditiveBlending;
+            helper.material.transparent = true;
+            group.add( helper );
+        //
+
+
+        // 最大化切片数
+        var segments = maxParticleCount * maxParticleCount;
+
+        // 线的位置储存数组，初始为空
+        positions = new Float32Array( segments * 3 );
+        // colors = new Float32Array( segments * 3 );
+        colors = new Float32Array( segments * 3 );
+
+        //  生成粒子，包括粒子的位置信息和颜色信息, 初始化particlesData，目前还不知道particlesData记录的信息有啥用, 。
+        // todo particlePositions 记录所有粒子的位置信息
+        // todo 粒子信息中setDrawRange意义不明
+        // todo particlesData是有值的，而且是随机的数值
+
+            var pMaterial = new THREE.PointsMaterial( {
+                color: 0xFFFFFF,
+                size: 3,
+                blending: THREE.AdditiveBlending,
+                transparent: true,
+                sizeAttenuation: false
+            } );
+
+
+            particles = new THREE.BufferGeometry();
+            // 点的位置
+            particlePositions = new Float32Array( maxParticleCount * 3 );
+
+            for ( var i = 0; i < maxParticleCount; i++ ) {
+
+                var x = Math.random() * r - r / 2;
+                var y = Math.random() * r - r / 2;
+                var z = Math.random() * r - r / 2;
+
+                particlePositions[ i * 3     ] = x;
+                particlePositions[ i * 3 + 1 ] = y;
+                particlePositions[ i * 3 + 2 ] = z;
+
+
+                particlesData.push( {
+                    velocity: new THREE.Vector3( -1 + Math.random() * 2, -1 + Math.random() * 2,  -1 + Math.random() * 2 ),
+                    numConnections: 0
+                } );
+            }
+
+            particles.setDrawRange( 0, particleCount );
+            particles.addAttribute( 'position', new THREE.BufferAttribute( particlePositions, 3 ).setDynamic( true ) );
+
+            pointCloud = new THREE.Points( particles, pMaterial );
+            group.add( pointCloud );
+        //
+
+        // 生成线的信息，但是位置信息并没在这赋值
+        // todo 生成线的信息中computeBoundingSphere和setDrawRange意义不明
+            var geometry = new THREE.BufferGeometry();
+
+            geometry.addAttribute( 'position', new THREE.BufferAttribute( positions, 3 ).setDynamic( true ) );
+            geometry.addAttribute( 'color', new THREE.BufferAttribute( colors, 3 ).setDynamic( true ) );
+
+            geometry.computeBoundingSphere();
+
+            geometry.setDrawRange( 0, 0 );
+
+            var material = new THREE.LineBasicMaterial( {
+                vertexColors: THREE.VertexColors,
+                blending: THREE.AdditiveBlending,
+                transparent: true
+            } );
+
+            linesMesh = new THREE.LineSegments( geometry, material );
+            group.add( linesMesh );
+        //
+
+
+        renderer = new THREE.WebGLRenderer( { antialias: true } );
+        renderer.setPixelRatio( window.devicePixelRatio );
+        renderer.setSize( _w,_h );
+        // renderer.setClearColor(new THREE.Color(0x110d0e, 1.0));
+
+        renderer.gammaInput = true;
+        renderer.gammaOutput = true;
+
+        container.appendChild( renderer.domElement );
+
+        stats = new Stats();
+        stats.domElement.style.position = 'absolute';
+        stats.domElement.style.top = '0px';
+
+        window.addEventListener( 'resize', onWindowResize, false );
+    }
+
+    function onWindowResize() {
+
+        camera.aspect = _w/_h;
+        camera.updateProjectionMatrix();
+
+        renderer.setSize( _w,_h );
+
+    }
+
+
+    function intersect(cur_point,_target) {
+
+        var direction =  new THREE.Vector3(0,0,0);
+
+        var startPoint = cur_point;
+
+        // 两个点做相减，得出移动的矢量 direction是原点
+        var directionVector = direction.sub( startPoint );
+
+        // todo Raycaster有什么用？ 从start点出发，经由某个方向，发出光线
+        var ray = new THREE.Raycaster(startPoint, directionVector.clone().normalize());
+
+        // 要求还没有render
+        scene.updateMatrixWorld(); // required, since you haven't rendered yet
+
+        // 检测cur_point 是否与_target发生碰撞
+        // cur_point是放大1000倍的位置信息
+        // _target是指矩形本身
+        // rayIntersects[0]表示的是位置点放大后的位置与原点的矢量连成的光线在矩形上投射的点
+        var rayIntersects = ray.intersectObjects([_target], true);
+
+        if (rayIntersects[0]) {
+            return rayIntersects[0].point;
+        }
+        return null;
+
+    }
+
+
+    function getObjectPoints(_target,_targetPoints){
+        // 将两个矩形加入group中
+        group.add( _target );
+
+        for ( var i = 0; i < particleCount; i++ ) {
+
+            // 将粒子的位置扩大1000倍
+            var cur_pos=new THREE.Vector3(particlePositions[ i * 3     ]*1000,particlePositions[ i * 3     +1]*1000,particlePositions[ i * 3     +2]*1000);
+
+            // 应该是将方形的geometry与粒子的位置信息做了处理得出一个inter_point
+            // todo 粒子扩散后在矩形上的投影位置
+            var inter_point=  intersect(cur_pos,_target);
+
+            if (inter_point) {
+                _targetPoints.push(inter_point.clone());
+            }
+            else{
+                _targetPoints.push(new THREE.Vector3(particlePositions[ i * 3  ],particlePositions[ i * 3  +1],particlePositions[ i * 3     +2]))
+            }
+
+        }
+
+        // 将两个矩形移出group中
+        group.remove( _target );
+
+    }
+    function getClosest(){
+
+        for ( var i = 0; i < particleCount; i++ ) {
+            var  min_dist=1000;
+            var  min_i=0;
+
+            var cur_pos=new THREE.Vector3(particlePositions[ i * 3     ],particlePositions[ i * 3     +1],particlePositions[ i * 3     +2]);
+
+            var particleData = particlesData[i];
+
+            for (var j=0;j<morphTarget.length;j++) {
+                // todo 需要搞清particleData.velocity以及morphTarget
+                var dx = cur_pos.x + particleData.velocity.x*20 - morphTarget[ j ].x;
+                var dy = cur_pos.y + particleData.velocity.y*20  - morphTarget[ j ].y;
+                var dz = cur_pos.z + particleData.velocity.z*20 - morphTarget[ j ].z;
+                var dist = Math.sqrt( dx * dx + dy * dy + dz * dz );
+                if (dist<min_dist) {
+                    min_dist=dist;
+                    min_i=j;
+                }
+
+            }
+            particlesData[ i ].cur_pos=morphTarget[ min_i ];
+
+            morphTarget.splice(min_i, 1);
+        }
+    }
+
+    function animate() {
+
+        if (is_animate) {
+            var vertexpos = 0;
+            var colorpos = 0;
+            var numConnected = 0;
+
+            // 每次动画执行前将numConnections置为0
+            for ( var i = 0; i < particleCount; i++ )
+                particlesData[ i ].numConnections = 0;
+
+            // 对particlesData进行设置
+            for ( var i = 0; i < particleCount; i++ ) {
+
+                var particleData = particlesData[i];
+
+                var zero=new THREE.Vector3(0,0,0);
+
+                // 获取指定粒子的位置信息
+                var cur_pos=new THREE.Vector3(particlePositions[ i * 3 ],particlePositions[ i * 3 + 1 ],particlePositions[ i * 3 + 2 ]);
+
+                // anim 应该是控制动画的开关，但被鸽了
+                if(anim){
+                    // startMorph粒子是否移动为方形矩形的开关
+                    // 已经开始移动就是会变形
+                    // 如果不变形就是会慢慢的自己变动
+                    // particlesData的数据应该是在别的地方记录的
+                    if(startMorph){
+
+                        // 变形停止的条件
+                        // counter应该是动画执行的轮数
+                        // morphStartedAt 应该是某个条件下的动画执行轮数，具体未知。
+                        // 20*(0.1/effectController.morphing_speed)) 应该就是一个动画执行速度
+                        if(counter-morphStartedAt>20*(0.1/effectController.morphing_speed))
+                            startMorph=false;
+
+                        // 更新粒子的位置信息到指定位置
+                        particlePositions[ i * 3    ]=cur_pos.x*(1-effectController.morphing_speed)+ particlesData[ i ].cur_pos.x*effectController.morphing_speed;
+                        particlePositions[ i * 3  +1]=cur_pos.y*(1-effectController.morphing_speed)+ particlesData[ i ].cur_pos.y*effectController.morphing_speed;
+                        particlePositions[ i * 3  +2]=cur_pos.z*(1-effectController.morphing_speed)+ particlesData[ i ].cur_pos.z*effectController.morphing_speed;
+                    }else{
+                        // 更新粒子的位置信息通过某个速度值
+                        particlePositions[ i * 3     ] -= particleData.velocity.x*effectController.anim_speed;
+                        particlePositions[ i * 3 + 1 ] -= particleData.velocity.y*effectController.anim_speed;
+                        particlePositions[ i * 3 + 2 ] -= particleData.velocity.z*effectController.anim_speed;
+                    }
+
+                }
+
+                // 应该是判断连线数是否大于限制的连线数
+                if ( effectController.limitConnections && particleData.numConnections >= effectController.maxConnections )
+                    continue;
+
+                // Check collision 检测碰撞?
+                // 等于把点与所有剩下的点进行遍历 获取两个点之间的距离
+                for ( var j = i + 1; j < particleCount; j++ ) {
+
+                    var particleDataB = particlesData[ j ];
+                    if ( effectController.limitConnections && particleDataB.numConnections >= effectController.maxConnections )
+                        continue;
+
+                    var dx = particlePositions[ i * 3     ] - particlePositions[ j * 3     ];
+                    var dy = particlePositions[ i * 3 + 1 ] - particlePositions[ j * 3 + 1 ];
+                    var dz = particlePositions[ i * 3 + 2 ] - particlePositions[ j * 3 + 2 ];
+
+
+                    var dist = Math.sqrt( dx * dx + dy * dy + dz * dz );
+
+                    // 如果距离小于指定的最小值，则两个点之间的连线数加1
+                    if ( dist < effectController.minDistance ) {
+
+                        particleData.numConnections++;
+                        particleDataB.numConnections++;
+
+                        // 且会随着距离去计算线颜色的alpha值
+                        var alpha = 1.0 - dist / effectController.minDistance;
+
+                        // position为线的位置信息 vertexpos这个值有点看不懂
+                        // 线的位置信息需要更新
+                        // 重新绘制线的内容，其实这块可以不需要的，直接在init的时候写死？
+                        positions[ vertexpos++ ] = particlePositions[ i * 3     ];
+                        positions[ vertexpos++ ] = particlePositions[ i * 3 + 1 ];
+                        positions[ vertexpos++ ] = particlePositions[ i * 3 + 2 ];
+
+                        positions[ vertexpos++ ] = particlePositions[ j * 3     ];
+                        positions[ vertexpos++ ] = particlePositions[ j * 3 + 1 ];
+                        positions[ vertexpos++ ] = particlePositions[ j * 3 + 2 ];
+
+                        console.log('----');
+                        console.log(alpha);
+
+                        colors[ colorpos++ ] = alpha;
+                        colors[ colorpos++ ] = alpha;
+                        colors[ colorpos++ ] = alpha;
+
+                        colors[ colorpos++ ] = alpha;
+                        colors[ colorpos++ ] = alpha;
+                        colors[ colorpos++ ] = alpha;
+
+                        // 添加的线+1？
+                        numConnected++;
+                    }
+                }
+            }
+
+            // 重新绘制线，更新线的信息
+            linesMesh.geometry.setDrawRange( 0, numConnected * 2 );
+            linesMesh.geometry.attributes.position.needsUpdate = true;
+            linesMesh.geometry.attributes.color.needsUpdate = true;
+
+            pointCloud.geometry.attributes.position.needsUpdate = true;
+        } else {
+            // let tmp = [];
+            //
+            // for  (var i = 0; i < particlePositions.length; i++) {
+            //     tmp.push(particlePositions[i]);
+            // }
+            // console.log(tmp);
+            // console.log(JSON.stringify(positions));
+            if (is_print) {
+                let tmp = [];
+                let tmp2 = [];
+
+                for  (var i = 0; i < 3000; i++) {
+                    tmp.push(particlePositions[i]);
+                }
+
+                for (var j = 0; j < 6000; j++) {
+                    tmp2.push(positions[j]);
+                }
+
+                console.log(JSON.stringify(tmp));
+                console.log(JSON.stringify(tmp2));
+
+                console.log(tmp.length);
+                console.log(tmp2.length);
+
+                is_print = false;
+            }
+
+        }
+
+        requestAnimationFrame( animate );
+
+        stats.update();
+        render();
+
+    }
+
+    var frame=0;
+    var frame_num=0;
+    var counter=0;
+    var current_shape=0;
+
+    function render() {
+        frame++;
+        counter++;
+
+        if(frame==1){
+            // targetShapes就是一开始记录的两个矩形和方形 而且这时候两个方形的points应该是空的
+            for (var i = 0; i < targetShapes.length; i++) {
+                // 这个函数是往point里面填位置信息，这个位置信息应该就是图形本身的位置信息
+                // targetShapes[i].points里面会有投影的位置信息
+                getObjectPoints(targetShapes[i],targetShapes[i].points);
+            }
+        }
+
+        var time = Date.now() * 0.001;
+        // group.rotation.y += 1 * Math.PI / 180;
+
+        renderer.render( scene, camera );
+
+        // 每0.12秒运行一次
+        if(frame%120==0){
+
+            // 清空矩形的points，然后根据新的位置重新计算位置信息。
+            targetShapes[current_shape].points=[];
+            getObjectPoints(targetShapes[current_shape],targetShapes[current_shape].points);
+
+            // 动态目标
+            morphTarget= targetShapes[current_shape].points.slice(0);
+
+            // 获取最近的？
+            getClosest();
+            morphStartedAt=counter;
+            startMorph=true;
+            var prev_shape=current_shape;
+            while(current_shape==prev_shape){
+                current_shape=Math.floor(Math.random()*targetShapes.length);
+
+            }
+            // console.log(current_shape);
+
+        }
+
+
+    }
+
+    let button = document.querySelector('button');
+    button.addEventListener('click', () => {
+        is_animate = !is_animate;
+    })
+
+
+</script>
+
+
+</body>
+</html>
