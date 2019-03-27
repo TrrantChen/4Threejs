@@ -84,8 +84,9 @@
         mesh = void 0;
         points = void 0;
         positions = void 0;
+        group = void 0;
 
-
+        rotate_point = void 0;
 
         constructor(dom, data) {
             this.data =data;
@@ -95,17 +96,17 @@
         }
 
         init() {
+            this.group = new THREE.Group();
             this.initCanvas();
             this.initRenderer();
             this.initScene();
             this.initCamera();
-            this.initControls();
-
             if (this.is_test) {
                 this.initTest();
             }
 
             this.initMesh();
+            this.initControls();
             this.addEvent();
         }
 
@@ -160,6 +161,10 @@
             this.controls.maxDistance = 10000;
             //是否开启右键拖拽 手机上可以禁止拖拽中心
             this.controls.enablePan = false;
+
+            if (this.rotate_point) {
+                this.controls.target = this.rotate_point;
+            }
         }
 
         initTest() {
@@ -212,9 +217,7 @@
                     }
                 `;
 
-            let count = parseInt(Math.random() * 100);
-            console.log(count);
-
+            let count = parseInt(Math.random() * 100) + 50;
             let geometry = new THREE.BufferGeometry();
             let positions = new Float32Array(count * 3);
             let colors = new Float32Array(count * 3);
@@ -286,9 +289,13 @@
 
             this.points = new THREE.Points(geometry, material);
             let lines = new THREE.LineSegments(line_geometry, line_material);
-            this.scene.add(this.points);
-            this.scene.add(lines);
 
+            this.group.add(this.points);
+            this.group.add(lines);
+
+            this.group.translateOnAxis(new THREE.Vector3(-1,0,0), 500);
+            this.rotate_point = new THREE.Vector3(-500,0,0);
+            this.scene.add(this.group);
         }
 
         createGeometry() {
@@ -317,7 +324,7 @@
             }
 
             if (this.test_control.is_enable_animate) {
-
+                this.group.rotateY(Math.PI/4000);
             }
 
             let delta = this.clock.getDelta();

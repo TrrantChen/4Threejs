@@ -1,3 +1,4 @@
+<!--line_mesh要在point_mesh之前new，线才会被点遮住-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -100,6 +101,19 @@
     // let svg = textureLoader.load('../model/01.svg');
 
     getCanvasIncludeSvg('../model/01.svg').then((value) => {
+
+
+        let line_geometry = new THREE.BufferGeometry();
+        line_geometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array([ 0, 0, 0, 6.016313992548471,  257.46648060285247, 81.61744649929355]), 3));
+        line_geometry.addAttribute('color', new THREE.BufferAttribute(new Float32Array([1, 1, 1, 1, 1, 1]), 3));
+        let line_material = new THREE.LineBasicMaterial( {
+            vertexColors: THREE.VertexColors,
+            blending: THREE.AdditiveBlending,
+            transparent: true
+        });
+
+        let lines_mesh = new THREE.LineSegments(line_geometry, line_material);
+
         let material = new THREE.PointsMaterial({
             size: 40,
             vertexColors: true, // 是否为几何体的每个顶点应用颜色，默认值是为所有面应用材质的颜色
@@ -112,7 +126,6 @@
             depthTest: false,
             color: 0xffffff,
         });
-
         particles = new THREE.Points( geometry, material );
         //
         // particles.position.set( 0, 0, 0 );
@@ -120,16 +133,6 @@
 
         scene.add(particles);
 
-        let line_geometry = new THREE.BufferGeometry();
-        line_geometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array([ 0, 0, 0, 6.016313992548471,  257.46648060285247, 81.61744649929355]), 3));
-        line_geometry.addAttribute('color', new THREE.BufferAttribute(new Float32Array([1, 1, 1, 1, 1, 1]), 3));
-        let line_material = new THREE.LineBasicMaterial( {
-            vertexColors: THREE.VertexColors,
-            blending: THREE.AdditiveBlending,
-            transparent: true
-        });
-
-        let lines_mesh = new THREE.LineSegments(line_geometry, line_material);
 
         scene.add(lines_mesh);
 
