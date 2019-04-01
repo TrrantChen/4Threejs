@@ -153,11 +153,11 @@
                 this.camera.position.set(0,0, 300);
                 // this.camera.position.set(300,0, 0);
                 // this.camera.position.set(0, 300, 0);
-                this.camera.lookAt({
-                    x : 100,
-                    y : 0,
-                    z : 0
-                });
+                // this.camera.lookAt({
+                //     x : 100,
+                //     y : 0,
+                //     z : 0
+                // });
                 this.camera.lookAt(this.scene.position);
             }
         }
@@ -179,7 +179,7 @@
             //是否开启右键拖拽 手机上可以禁止拖拽中心
             this.controls.enablePan = false;
 
-            this.controls.target = new THREE.Vector3(0, 300, 0);
+            // this.controls.target = new THREE.Vector3(0, 300, 0);
         }
 
         initTest() {

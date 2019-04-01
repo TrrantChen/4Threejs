@@ -1,3 +1,4 @@
+<!--测试vectorColor以及canvas，png，webgl之间的联系-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -43,7 +44,7 @@
                     gl_PointSize = size * ( 300.0 / -mvPosition.z );
                     gl_Position = projectionMatrix * mvPosition;
                 }
-</script>
+            </script>
 <script type="x-shader/x-fragment" id="fragmentshader">
                 uniform vec3 color;
                 uniform sampler2D texture;
@@ -53,12 +54,12 @@
                     gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
                     if ( gl_FragColor.a < ALPHATEST ) discard;
                 }
-</script>
+            </script>
 <script>
 	class MyThree {
         data = void 0;
-        w = 800;
-        h = 600;
+        w = window.innerWidth;
+        h = window.innerHeight;
         dom = void 0;
 
         renderer = void 0;
@@ -192,29 +193,163 @@
         }
 
         initMesh() {
-            let positions = new Float32Array([1, 1, 1]);
-            let colors = new Float32Array([1, 1, 1]);
-            let size = new Float32Array([10]);
-            let texture = new THREE.TextureLoader().load( "../three/disc.png" );
-
-            let point_geometry = new THREE.BufferGeometry();
-            point_geometry.addAttribute( 'position', new THREE.BufferAttribute( positions, 3 ) );
-            point_geometry.addAttribute( 'customColor', new THREE.BufferAttribute( colors, 3 ));
-            point_geometry.addAttribute( 'size', new THREE.BufferAttribute( size, 1 ));
-
-            let material = new THREE.ShaderMaterial( {
-                uniforms: {
-                    color: { value: new THREE.Color( 0xffffff ) },
-                    texture: { value: texture }
+            let color = new THREE.Color(0x8B2323);
+            let lst = [
+                {
+                    name: 'position',
+                    data: new Float32Array([1, 1, 1]),
+                    item_size: 3,
                 },
-                vertexShader: document.getElementById( 'vertexshader' ).textContent,
-                fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
-                alphaTest: 0.9
-            } );
+                {
+                    name: 'size',
+                    data: new Float32Array([100]),
+                    item_size: 1,
+                },
+                {
+                    name: 'color',
+                    data: new Float32Array([color.r, color.g, color.b]),
+                    item_size: 3,
+                },
+                {
+                    name: 'customColor',
+                    data: new Float32Array([color.r, color.g, color.b]),
+                    item_size: 3,
+                },
+            ];
 
-            this.points = new THREE.Points(point_geometry, material);
-            this.scene.add(this.points);
+            let geometry = this.createGeometry(lst);
+            let material = this.createMaterial(3);
+
+            let point = new THREE.Points(geometry, material);
+            this.scene.add(point);
         }
+
+        createMaterial(type = 0) {
+            let texture = new THREE.TextureLoader().load( "../three/disc.png" );
+            let canvas = this.anotherSprite();
+            let material = void 0;
+            let obj = this.getShader(0);
+
+            switch(parseInt(type)) {
+                // shaderMaterial canvas
+                case 0:
+                default:
+                    material = new THREE.ShaderMaterial( {
+                        color: 0xffffff,
+                        uniforms: {
+                            color: { value: new THREE.Color( 0xffffff ) },
+                            texture: {
+                                value: canvas,
+                            }
+                        },
+                        vertexShader: obj.vertex,
+                        fragmentShader:  obj.fragment,
+                        blending: THREE.AdditiveBlending,
+                        // blending: THREE.NoBlending,
+                        depthTest: false,
+                        transparent: true,
+                        vertexColors: true,
+                        side: THREE.DoubleSide,
+                    } );
+                    break;
+                // shaderMaterial png
+                case 1:
+                    material = new THREE.ShaderMaterial( {
+                        color: 0xffffff,
+                        uniforms: {
+                            color: { value: new THREE.Color( 0xffffff ) },
+                            texture: {
+                                value: texture,
+                            }
+                        },
+                        vertexShader: obj.vertex,
+                        fragmentShader:  obj.fragment,
+                        blending: THREE.AdditiveBlending,
+                        // blending: THREE.NoBlending,
+                        depthTest: false,
+                        transparent: true,
+                        vertexColors: true,
+                        side: THREE.DoubleSide,
+                    } );
+                    break;
+                // pointsMaterial canvas
+                case 2:
+                    material = new THREE.PointsMaterial({
+                        // color: 0xffffff,
+                        size: 40,
+                        // vertexColors: true, // 是否为几何体的每个顶点应用颜色，默认值是为所有面应用材质的颜色
+                        // blending: THREE.NoBlending,
+                        blending: THREE.AdditiveBlending,
+                        map: canvas,
+                        sizeAttenuation: true,
+                        opacity: 1,
+                        transparent: true,
+                        depthTest: false,
+                        side: THREE.DoubleSide,
+                    });
+                    break;
+                // pointsMaterial png
+                case 3:
+                    material = new THREE.PointsMaterial({
+                        // color: 0xffffff,
+                        size: 40,
+                        // vertexColors: true, // 是否为几何体的每个顶点应用颜色，默认值是为所有面应用材质的颜色
+                        // blending: THREE.NoBlending,
+                        blending: THREE.AdditiveBlending,
+                        map: texture,
+                        sizeAttenuation: true,
+                        opacity: 1,
+                        transparent: true,
+                        depthTest: false,
+                        side: THREE.DoubleSide,
+                    });
+                    break;
+            }
+
+            return material;
+        }
+
+        createGeometry(lst) {
+            let geometry = new THREE.BufferGeometry();
+
+            for (var obj of lst) {
+
+                let name = obj.name;
+                let data = obj.data;
+                let item_size = obj.item_size;
+
+                if (Array.isArray(data)) {
+                    data = new Float32Array(data);
+                }
+                else if (Object.prototype.toString.call(data) === "[object Object]") {
+                    switch(name) {
+                        case 'position':
+                            data = new Float32Array([data.x, data.y, data.z]);
+                            break;
+                        case 'color':
+                            data = new Float32Array([data.r, data.g, data.b]);
+                            break;
+                        default:
+                            console.error(`createGeometry error, data is ${data}`);
+                            break;
+                    }
+                }
+
+                geometry.addAttribute(name, new THREE.BufferAttribute(data, item_size));
+            }
+
+            return geometry;
+        }
+
+        getColors() {
+
+        }
+
+        getPositions() {
+
+        }
+
+
 
         render() {
             this.renderer.render(this.scene, this.camera);
@@ -327,6 +462,80 @@
             texture.needsUpdate = true;
             // return a texture made from the canvas
             return texture;
+        }
+
+        anotherSprite() {
+            var canvas = document.createElement('canvas');
+            canvas.width = 128;
+            canvas.height = 128;
+            let texture = new THREE.Texture(canvas);
+            var ctx = canvas.getContext('2d');
+            var gradient = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, 0, canvas.width / 2, canvas.height / 2, canvas.width / 2);
+            gradient.addColorStop(0, 'rgba(255,255,255,1)');
+            gradient.addColorStop(0.2, 'rgba(240,255,240,1)');
+            gradient.addColorStop(0.22, 'rgba(0,150,255,.2)');
+            gradient.addColorStop(1, 'rgba(0,50,255,0)');
+            ctx.fillStyle = gradient; // "#FFFFFF"; // gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            texture.needsUpdate = true;
+
+            return texture;
+        }
+
+        getShader(type = 0) {
+            let result = {
+                vertex: '',
+                fragment: '',
+            };
+
+            switch(type) {
+                case 0:
+                default:
+                    result.vertex = `
+                        attribute float size;
+                        varying vec3 vColor;
+                        void main() {
+                            vColor = color;
+                            vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+                            gl_PointSize = size * ( 300.0 / -mvPosition.z );
+                            gl_Position = projectionMatrix * mvPosition;
+                        }
+                    `;
+                    result.fragment = `
+                        uniform sampler2D texture;
+                        varying vec3 vColor;
+                        void main() {
+                            gl_FragColor = vec4( vColor, 1.0 );
+                            gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
+                        }
+                    `;
+                    break;
+                case 1:
+                    result.vertex = `
+                        attribute float size;
+                        attribute vec3 customColor;
+                        varying vec3 vColor;
+                        void main() {
+                            vColor = customColor;
+                            vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+                            gl_PointSize = size * ( 300.0 / -mvPosition.z );
+                            gl_Position = projectionMatrix * mvPosition;
+                        }
+                    `;
+                    result.fragment = `
+                        uniform vec3 color;
+                        uniform sampler2D texture;
+                        varying vec3 vColor;
+                        void main() {
+                            gl_FragColor = vec4( color * vColor, 1.0 );
+                            gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
+                            if ( gl_FragColor.a < ALPHATEST ) discard;
+                        }
+                    `;
+                    break;
+            }
+
+            return result;
         }
     }
 

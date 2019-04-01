@@ -227,6 +227,11 @@
             let line_geometry = new THREE.BufferGeometry();
             let line_positions = new Float32Array(count * 3 * 2);
             let line_colors = new Float32Array(count * 3 * 2);
+            let start_positions = {
+                x: 0,
+                y: 0,
+                z: 0,
+            }
 
 
             for (var i = 0; i < count; i++) {
@@ -241,9 +246,14 @@
                 colors[i * 3 + 1] = color.g;
                 colors[i * 3 + 2] = color.b;
 
-                line_positions[i * 6] = 0;
-                line_positions[i * 6 + 1] = 0;
-                line_positions[i * 6 + 2] = 0;
+                let tmp_position = this.modifyLinePosition(start_positions, 5, true, position);
+
+                line_positions[i * 6] = tmp_position.x;
+                line_positions[i * 6 + 1] = tmp_position.y;
+                line_positions[i * 6 + 2] = tmp_position.z;
+                // line_positions[i * 6] = start_positions.x;
+                // line_positions[i * 6 + 1] = start_positions.y;
+                // line_positions[i * 6 + 2] = start_positions.z;
                 line_positions[i * 6 + 3] = position.x;
                 line_positions[i * 6 + 4] = position.y;
                 line_positions[i * 6 + 5] = position.z;
@@ -268,7 +278,7 @@
             let material = new THREE.ShaderMaterial({
                 uniforms: {
                     texture: {
-                        value: this.anotherSprite(),
+                        value: this.badPointSprite(),
                     }
                 },
                 vertexShader: vertexshader,
@@ -290,7 +300,18 @@
             this.points = new THREE.Points(geometry, material);
             let lines = new THREE.LineSegments(line_geometry, line_material);
 
+            let zero_geometry = new THREE.BufferGeometry();
+            zero_geometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array([start_positions.x, start_positions.y, start_positions.z]), 3));
+            zero_geometry.addAttribute('color', new THREE.BufferAttribute(new Float32Array([color.r, color.g, color.b]), 3));
+            zero_geometry.addAttribute('size', new THREE.BufferAttribute(new Float32Array([90]), 1));
+
+            this.group.add(new THREE.Points(
+                zero_geometry,
+                material
+            ));
+
             this.group.add(this.points);
+
             this.group.add(lines);
 
             this.group.translateOnAxis(new THREE.Vector3(-1,0,0), 500);
@@ -459,6 +480,54 @@
             texture.needsUpdate = true;
 
             return texture;
+        }
+
+        badPointSprite() {
+            var canvas = document.createElement('canvas');
+            canvas.width = 128;
+            canvas.height = 128;
+            let texture = new THREE.Texture(canvas);
+            var ctx = canvas.getContext('2d');
+            var gradient = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, 0, canvas.width / 2, canvas.height / 2, canvas.width / 2);
+            // gradient.addColorStop(0, 'rgba(255,193,193,1)');
+            gradient.addColorStop(0, 'rgba(255,48,48,1)');
+            gradient.addColorStop(0.2, 'rgba(255, 0, 0,1)');
+            gradient.addColorStop(0.22, 'rgba(238, 44, 44,.2)');
+            gradient.addColorStop(1, 'rgba(250,128,114,0)');
+            ctx.fillStyle = gradient; // "#FFFFFF"; // gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            texture.needsUpdate = true;
+
+            return texture;
+        }
+
+        modifyLinePosition(position, distance, is_add, vector) {
+
+            let x = position.x;
+            let y = position.y;
+            let z = position.z;
+            let result = {
+                x: 0,
+                y: 0,
+                z: 0,
+            };
+
+            if (is_add) {
+                let r = Math.sqrt(Math.pow(vector.x - x, 2) + Math.pow(vector.y - y, 2) + Math.pow(vector.z - z, 2));
+
+                result.x = x + vector.x * distance / r;
+                result.y = y + vector.y * distance / r;
+                result.z = z + vector.z * distance / r;
+            }
+            else {
+                let r = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
+
+                result.x = x - x * distance / r;
+                result.y = y - y * distance / r;
+                result.z = z - z * distance / r;
+            }
+
+            return result;
         }
     }
 
