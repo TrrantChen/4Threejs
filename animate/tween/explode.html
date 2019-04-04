@@ -1,4 +1,3 @@
-<!--tween只能通过修改mesh的position来修改动画，不能符合需求-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -26,16 +25,15 @@
     </style>
 </head>
 <body>
-<div style="background: black;width: 100%;height: 100%;">
-    <canvas id="main" style="background: rgba(255,255,255,0); width: 100%; height: 100%;"></canvas>
-</div>
+<canvas id="main"></canvas>
 </body>
-<script src="../three/WebGL.js"></script>
-<script src="../three/three.js"></script>
-<script src="../three/stats.min.js"></script>
-<script src="../three/OrbitControls.js"></script>
-<script src="../three/dat.gui.min.js"></script>
-<script src="../three/STLLoader.js"></script>
+<script src="../../three/WebGL.js"></script>
+<script src="../../three/three.js"></script>
+<script src="../../three/stats.min.js"></script>
+<script src="../../three/OrbitControls.js"></script>
+<script src="../../three/dat.gui.min.js"></script>
+<script src="../../three/STLLoader.js"></script>
+<script src="../../three/tween.min.js"></script>
 <script type="x-shader/x-vertex" id="vertexshader">
                 attribute float size;
                 attribute vec3 customColor;
@@ -57,10 +55,7 @@
                     if ( gl_FragColor.a < ALPHATEST ) discard;
                 }
             </script>
-<script type="module" src="./point_tween.js"></script>
 <script type="module">
-    import { PointTween } from './point_tween.js';
-
     class MyThree {
         data = void 0;
         w = window.innerWidth;
@@ -86,12 +81,17 @@
             is_enable_event: true,
         };
 
+
         // mesh
         mesh = void 0;
         points = void 0;
         positions = void 0;
-        tween = void 0;
+        group = void 0;
+
+        rotate_point = void 0;
+
         point_tween = void 0;
+        line_tween = void 0;
 
         constructor(dom, data) {
             this.data =data;
@@ -101,17 +101,17 @@
         }
 
         init() {
+            this.group = new THREE.Group();
             this.initCanvas();
             this.initRenderer();
             this.initScene();
             this.initCamera();
-            this.initControls();
-
             if (this.is_test) {
                 this.initTest();
             }
 
             this.initMesh();
+            this.initControls();
             this.addEvent();
         }
 
@@ -127,11 +127,12 @@
                     // 在 css 中设置背景色透明显示渐变色
                     alpha: true,
                     // 开启抗锯齿
-                    antialias: true
+                    antialias: false
                 });
 
                 // 这句要加，否则镜头会发虚
                 this.renderer.setSize(this.w, this.h);
+                this.renderer.setClearColor(0x000000);
             }
         }
 
@@ -144,7 +145,7 @@
         initCamera() {
             if (this.camera === void 0) {
                 this.camera = new THREE.PerspectiveCamera(45, this.w / this.h, 1, 10000);
-                this.camera.position.set(0, 0, 150);
+                this.camera.position.set(0, 0, 1000);
                 this.camera.lookAt(this.scene.position);
             }
         }
@@ -165,6 +166,7 @@
             this.controls.maxDistance = 10000;
             //是否开启右键拖拽 手机上可以禁止拖拽中心
             this.controls.enablePan = false;
+
         }
 
         initTest() {
@@ -197,128 +199,7 @@
         }
 
         initMesh() {
-            this.createOnePointByPointMaterial();
-        }
-
-        createOnePointByPointMaterial() {
-            let count = 1;
-            let source_positions = this.getPositions(count,[{
-                x: 10,
-                y: 10,
-                z: 10,
-            },
-            ]);
-
-            let target_positions = this.getPositions(count,[{
-                x: 50,
-                y: 40,
-                z: 30,
-            },
-            ]);
-
-            let colors = this.getColors(count, {
-                r: 1,
-                g: 1,
-                b: 1,
-            });
-
-            let sizes = this.getSizes(count, 10);
-
-            let geometry = this.createGeometry(source_positions, colors, [
-                {
-                    name: 'customColor',
-                    arr: colors,
-                    item_size: 1,
-                },
-                {
-                    name: 'size',
-                    arr: sizes,
-                    item_size: 1,
-                }]);
-
-            let matirial = this.createMaterial({
-                texture: this.anotherSprite(),
-            });
-
-            this.points = new THREE.Points(geometry, matirial);
-
-            this.point_tween = new PointTween(
-                source_positions,
-                target_positions,
-                400,
-                this.points,
-            );
-
-
-            this.scene.add(this.points);
-        }
-
-        createGeometry(positions, colors, customs) {
-            let geometry = new THREE.BufferGeometry();
-            geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3));
-            geometry.addAttribute('color', new THREE.BufferAttribute(colors, 1));
-
-            if (customs) {
-                for (var custom of customs) {
-                    geometry.addAttribute(custom.name, new THREE.BufferAttribute(custom.arr, custom.item_size));
-                }
-            }
-
-            return geometry;
-        }
-
-        getColors(count, obj) {
-            let tmp = [];
-
-            for (var i = 0; i < count; i++) {
-                tmp.push(obj.r);
-                tmp.push(obj.g);
-                tmp.push(obj.b);
-            }
-
-            let colors = new Float32Array(tmp);
-
-            return colors;
-        }
-
-        getPositions(count, vertices) {
-            let arr = [];
-
-            for (var i = 0; i < count; i++) {
-                let vertice = vertices[i];
-                arr.push(vertice.x);
-                arr.push(vertice.y);
-                arr.push(vertice.z);
-            }
-
-            let positions = new Float32Array(arr);
-            return positions;
-        }
-
-        getSizes(count, size) {
-            let arr = [];
-
-            for (var i = 0; i < count; i++) {
-                arr.push(size)
-            }
-
-            let sizes = new Float32Array(arr);
-            return sizes;
-        }
-
-        createMaterial(obj) {
-            let default_obj = {
-                texture: this.getCircle(),
-                size: 10,
-                color: 0xffffff,
-                material_type: 'Point',
-            };
-            let current_obj = obj === void 0 ? default_obj : Object.assign(default_obj, obj) ;
-
-            let material = void 0;
-
-            if (current_obj.material_type === 'shader') {
-                let vertexshader = `
+            let vertexshader = `
                     attribute float size;
                     varying vec3 vColor;
                     void main() {
@@ -329,7 +210,7 @@
                     }
                 `;
 
-                let fragmentshader = `
+            let fragmentshader = `
                     uniform sampler2D texture;
                     varying vec3 vColor;
                     void main() {
@@ -338,37 +219,149 @@
                     }
                 `;
 
-                material = new THREE.ShaderMaterial( {
-                    color: current_obj.color,
-                    uniforms: {
-                        color: { value: new THREE.Color(current_obj.color) },
-                        texture: {
-                            value: current_obj.texture,
-                        }
-                    },
-                    vertexShader: vertexshader,
-                    fragmentShader: fragmentshader,
-                    blending: THREE.AdditiveBlending,
-                    depthTest: false,
-                    transparent: true,
-                    vertexColors: true,
-                    side: THREE.DoubleSide,
-                } );
-            }
-            else {
-                material = new THREE.PointsMaterial({
-                    color: current_obj.color,
-                    size: current_obj.size,
-                    opacity: 1,
-                    transparent: true,
-                    blending: THREE.AdditiveBlending,
-                    vertexColors: false,
-                    map: current_obj.texture,
-                    depthTest: false
-                });
+            let count = parseInt(Math.random() * 200) + 200;
+            let geometry = new THREE.BufferGeometry();
+            let point_start_positions = new Float32Array(count * 3);
+            let point_end_positions = new Float32Array(count * 3);
+            let colors = new Float32Array(count * 3);
+            let sizes = new Float32Array(count);
+            let color = new THREE.Color(0xffffff);
+
+            let line_geometry = new THREE.BufferGeometry();
+            let line_start_positions = new Float32Array(count * 3 * 2);
+            let line_end_positions = new Float32Array(count * 3 * 2);
+            let line_colors = new Float32Array(count * 3 * 2);
+            let start_positions = {
+                x: 0,
+                y: 0,
+                z: 0,
             }
 
-            return material;
+
+            for (var i = 0; i < count; i++) {
+                let radius = (Math.random() * 2 + 1) * 200;
+                let position = this.getPositionByRandomSphere(radius);
+
+                point_start_positions[i * 3] = 0;
+                point_start_positions[i * 3 + 1] = 0;
+                point_start_positions[i * 3 + 2] = 0;
+
+                point_end_positions[i * 3] = position.x;
+                point_end_positions[i * 3 + 1] = position.y;
+                point_end_positions[i * 3 + 2] = position.z;
+
+                colors[i * 3] = color.r;
+                colors[i * 3 + 1] = color.g;
+                colors[i * 3 + 2] = color.b;
+
+                let tmp_position = this.modifyLinePosition(start_positions, 5, true, position);
+
+                line_start_positions[i * 6] = 0;
+                line_start_positions[i * 6 + 1] = 0;
+                line_start_positions[i * 6 + 2] = 0;
+                line_start_positions[i * 6 + 3] = 0;
+                line_start_positions[i * 6 + 4] = 0;
+                line_start_positions[i * 6 + 5] = 0;
+
+
+                line_end_positions[i * 6] = tmp_position.x;
+                line_end_positions[i * 6 + 1] = tmp_position.y;
+                line_end_positions[i * 6 + 2] = tmp_position.z;
+                // line_positions[i * 6] = start_positions.x;
+                // line_positions[i * 6 + 1] = start_positions.y;
+                // line_positions[i * 6 + 2] = start_positions.z;
+                line_end_positions[i * 6 + 3] = position.x;
+                line_end_positions[i * 6 + 4] = position.y;
+                line_end_positions[i * 6 + 5] = position.z;
+
+                line_colors[i * 6] = 0.1;
+                line_colors[i * 6 + 1] = 0.1;
+                line_colors[i * 6 + 2] = 0.1;
+                line_colors[i * 6 + 3] = 0.1;
+                line_colors[i * 6 + 4] = 0.1;
+                line_colors[i * 6 + 5] = 0.1;
+
+                sizes[i] = 100;
+            }
+
+            geometry.addAttribute('position', new THREE.BufferAttribute(point_start_positions, 3).setDynamic( true ));
+            geometry.addAttribute('color', new THREE.BufferAttribute(colors, 3));
+            geometry.addAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+            line_geometry.addAttribute('position', new THREE.BufferAttribute(line_start_positions, 3).setDynamic( true ));
+            line_geometry.addAttribute('color', new THREE.BufferAttribute(line_colors, 3));
+
+            let material = new THREE.ShaderMaterial({
+                uniforms: {
+                    texture: {
+                        value: this.badPointSprite(),
+                    }
+                },
+                vertexShader: vertexshader,
+                fragmentShader: fragmentshader,
+                blending: THREE.AdditiveBlending,
+                depthTest: false,
+                transparent: true,
+                vertexColors: true,
+                side: THREE.DoubleSide,
+            });
+
+            let line_material = new THREE.LineBasicMaterial( {
+                vertexColors: THREE.VertexColors,
+                blending: THREE.AdditiveBlending,
+                transparent: true,
+                size: 0.2
+            } );
+
+            this.points = new THREE.Points(geometry, material);
+            let lines = new THREE.LineSegments(line_geometry, line_material);
+
+            let zero_geometry = new THREE.BufferGeometry();
+            zero_geometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array([start_positions.x, start_positions.y, start_positions.z]), 3));
+            zero_geometry.addAttribute('color', new THREE.BufferAttribute(new Float32Array([color.r, color.g, color.b]), 3));
+            zero_geometry.addAttribute('size', new THREE.BufferAttribute(new Float32Array([90]), 1));
+
+            this.group.add(new THREE.Points(
+                zero_geometry,
+                material
+            ));
+
+            this.group.add(this.points);
+
+            this.group.add(lines);
+            this.scene.add(this.group);
+
+            // point_tween = void 0;
+            // line_tween = void 0;
+            this.point_tween = new PointTween(
+                point_start_positions,
+                point_end_positions,
+                1000,
+                this.points,
+            );
+
+            this.line_tween = new PointTween(
+                line_start_positions,
+                line_end_positions,
+                1000,
+                lines,
+            )
+        }
+
+        createGeometry() {
+
+        }
+
+        getColors() {
+
+        }
+
+        getPositions() {
+
+        }
+
+        createMaterial() {
+
         }
 
         render() {
@@ -381,7 +374,9 @@
             }
 
             if (this.test_control.is_enable_animate) {
+                this.group.rotateY(Math.PI/4000);
                 this.point_tween.update();
+                this.line_tween.update();
             }
 
             let delta = this.clock.getDelta();
@@ -484,28 +479,20 @@
             return texture;
         }
 
-        getShiningCircle(size = 512) {
-            let canvas = document.createElement('canvas');
-            canvas.width = canvas.height = size;
-            let ctx = canvas.getContext('2d');
-            let texture = new THREE.Texture(canvas);
-            let center = size/2;
-            ctx.beginPath();
-            ctx.arc(center, center, size/2, 0, 2 * Math.PI, false);
-            ctx.closePath();
+        getPositionByRandomSphere(radius = 10, origin = { x: 0, y: 0, z: 0 }) {
+            let u = Math.random();
+            let v = Math.random();
+            let theta = 2 * Math.PI * u;
+            let phi = Math.acos(2 * v - 1);
+            let x = Math.sin(theta) * Math.sin(phi);
+            let y = Math.cos(theta) * Math.sin(phi);
+            let z = Math.cos(phi);
 
-            let lg = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, 0, canvas.width / 2, canvas.height / 2, canvas.width / 2);
-            // 向圆形渐变上添加颜色
-            lg.addColorStop(0.1 , "#ff0");
-            lg.addColorStop(0.4 , "#0ff");
-            lg.addColorStop(0.8 , "#f0f");
-            // 设置使用圆形渐变作为填充颜色
-            ctx.fillStyle = lg;
-            // ctx.fillStyle = 'rgba(255,255,255,1)';
-            ctx.fill();
-
-            texture.needsUpdate = true;
-            return texture;
+            return {
+                x: x * radius + origin.x,
+                y: y * radius + origin.y,
+                z: z * radius + origin.z
+            }
         }
 
         anotherSprite() {
@@ -525,6 +512,54 @@
 
             return texture;
         }
+
+        badPointSprite() {
+            var canvas = document.createElement('canvas');
+            canvas.width = 128;
+            canvas.height = 128;
+            let texture = new THREE.Texture(canvas);
+            var ctx = canvas.getContext('2d');
+            var gradient = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, 0, canvas.width / 2, canvas.height / 2, canvas.width / 2);
+            // gradient.addColorStop(0, 'rgba(255,193,193,1)');
+            gradient.addColorStop(0, 'rgba(255,48,48,1)');
+            gradient.addColorStop(0.2, 'rgba(255, 0, 0,1)');
+            gradient.addColorStop(0.22, 'rgba(238, 44, 44,.2)');
+            gradient.addColorStop(1, 'rgba(250,128,114,0)');
+            ctx.fillStyle = gradient; // "#FFFFFF"; // gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            texture.needsUpdate = true;
+
+            return texture;
+        }
+
+        modifyLinePosition(position, distance, is_add, vector) {
+
+            let x = position.x;
+            let y = position.y;
+            let z = position.z;
+            let result = {
+                x: 0,
+                y: 0,
+                z: 0,
+            };
+
+            if (is_add) {
+                let r = Math.sqrt(Math.pow(vector.x - x, 2) + Math.pow(vector.y - y, 2) + Math.pow(vector.z - z, 2));
+
+                result.x = x + vector.x * distance / r;
+                result.y = y + vector.y * distance / r;
+                result.z = z + vector.z * distance / r;
+            }
+            else {
+                let r = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
+
+                result.x = x - x * distance / r;
+                result.y = y - y * distance / r;
+                result.z = z - z * distance / r;
+            }
+
+            return result;
+        }
     }
 
     let dom = document.querySelector('#main');
@@ -532,6 +567,4 @@
 
 </script>
 </html>
-
-
 

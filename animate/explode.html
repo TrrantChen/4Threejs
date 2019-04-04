@@ -33,6 +33,7 @@
 <script src="../three/OrbitControls.js"></script>
 <script src="../three/dat.gui.min.js"></script>
 <script src="../three/STLLoader.js"></script>
+<script type="module" src="./point_tween.js"></script>
 <script type="x-shader/x-vertex" id="vertexshader">
                 attribute float size;
                 attribute vec3 customColor;
@@ -54,7 +55,9 @@
                     if ( gl_FragColor.a < ALPHATEST ) discard;
                 }
             </script>
-<script>
+<script type="module">
+    import { PointTween } from './point_tween.js';
+
     class MyThree {
         data = void 0;
         w = window.innerWidth;
@@ -80,6 +83,7 @@
             is_enable_event: true,
         };
 
+
         // mesh
         mesh = void 0;
         points = void 0;
@@ -87,6 +91,9 @@
         group = void 0;
 
         rotate_point = void 0;
+
+        point_tween = void 0;
+        line_tween = void 0;
 
         constructor(dom, data) {
             this.data =data;
@@ -214,15 +221,17 @@
                     }
                 `;
 
-            let count = parseInt(Math.random() * 100) + 50;
+            let count = parseInt(Math.random() * 200) + 200;
             let geometry = new THREE.BufferGeometry();
-            let positions = new Float32Array(count * 3);
+            let point_start_positions = new Float32Array(count * 3);
+            let point_end_positions = new Float32Array(count * 3);
             let colors = new Float32Array(count * 3);
             let sizes = new Float32Array(count);
             let color = new THREE.Color(0xffffff);
 
             let line_geometry = new THREE.BufferGeometry();
-            let line_positions = new Float32Array(count * 3 * 2);
+            let line_start_positions = new Float32Array(count * 3 * 2);
+            let line_end_positions = new Float32Array(count * 3 * 2);
             let line_colors = new Float32Array(count * 3 * 2);
             let start_positions = {
                 x: 0,
@@ -235,9 +244,13 @@
                 let radius = (Math.random() * 2 + 1) * 200;
                 let position = this.getPositionByRandomSphere(radius);
 
-                positions[i * 3] = position.x;
-                positions[i * 3 + 1] = position.y;
-                positions[i * 3 + 2] = position.z;
+                point_start_positions[i * 3] = 0;
+                point_start_positions[i * 3 + 1] = 0;
+                point_start_positions[i * 3 + 2] = 0;
+
+                point_end_positions[i * 3] = position.x;
+                point_end_positions[i * 3 + 1] = position.y;
+                point_end_positions[i * 3 + 2] = position.z;
 
                 colors[i * 3] = color.r;
                 colors[i * 3 + 1] = color.g;
@@ -245,15 +258,23 @@
 
                 let tmp_position = this.modifyLinePosition(start_positions, 5, true, position);
 
-                line_positions[i * 6] = tmp_position.x;
-                line_positions[i * 6 + 1] = tmp_position.y;
-                line_positions[i * 6 + 2] = tmp_position.z;
+                line_start_positions[i * 6] = 0;
+                line_start_positions[i * 6 + 1] = 0;
+                line_start_positions[i * 6 + 2] = 0;
+                line_start_positions[i * 6 + 3] = 0;
+                line_start_positions[i * 6 + 4] = 0;
+                line_start_positions[i * 6 + 5] = 0;
+
+
+                line_end_positions[i * 6] = tmp_position.x;
+                line_end_positions[i * 6 + 1] = tmp_position.y;
+                line_end_positions[i * 6 + 2] = tmp_position.z;
                 // line_positions[i * 6] = start_positions.x;
                 // line_positions[i * 6 + 1] = start_positions.y;
                 // line_positions[i * 6 + 2] = start_positions.z;
-                line_positions[i * 6 + 3] = position.x;
-                line_positions[i * 6 + 4] = position.y;
-                line_positions[i * 6 + 5] = position.z;
+                line_end_positions[i * 6 + 3] = position.x;
+                line_end_positions[i * 6 + 4] = position.y;
+                line_end_positions[i * 6 + 5] = position.z;
 
                 line_colors[i * 6] = 0.1;
                 line_colors[i * 6 + 1] = 0.1;
@@ -265,11 +286,11 @@
                 sizes[i] = 100;
             }
 
-            geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.addAttribute('position', new THREE.BufferAttribute(point_start_positions, 3).setDynamic( true ));
             geometry.addAttribute('color', new THREE.BufferAttribute(colors, 3));
             geometry.addAttribute('size', new THREE.BufferAttribute(sizes, 1));
 
-            line_geometry.addAttribute('position', new THREE.BufferAttribute(line_positions, 3));
+            line_geometry.addAttribute('position', new THREE.BufferAttribute(line_start_positions, 3).setDynamic( true ));
             line_geometry.addAttribute('color', new THREE.BufferAttribute(line_colors, 3));
 
             let material = new THREE.ShaderMaterial({
@@ -311,6 +332,22 @@
 
             this.group.add(lines);
             this.scene.add(this.group);
+
+            // point_tween = void 0;
+            // line_tween = void 0;
+            this.point_tween = new PointTween(
+                point_start_positions,
+                point_end_positions,
+                1000,
+                this.points,
+            );
+
+            this.line_tween = new PointTween(
+                line_start_positions,
+                line_end_positions,
+                1000,
+                lines,
+            )
         }
 
         createGeometry() {
@@ -340,6 +377,8 @@
 
             if (this.test_control.is_enable_animate) {
                 this.group.rotateY(Math.PI/4000);
+                this.point_tween.update();
+                this.line_tween.update();
             }
 
             let delta = this.clock.getDelta();

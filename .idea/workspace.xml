@@ -3,7 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="0c120a61-310d-461e-93dd-569b0e349f28" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/point/w_particle_active.html" beforeDir="false" afterPath="$PROJECT_DIR$/point/w_particle_active.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/animate/explode.html" beforeDir="false" afterPath="$PROJECT_DIR$/animate/explode.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/animate/point_tween.js" beforeDir="false" afterPath="$PROJECT_DIR$/animate/point_tween.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/animate/single_point.html" beforeDir="false" afterPath="$PROJECT_DIR$/animate/single_point.html" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -19,8 +21,87 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/animate/explode.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="235">
-              <caret line="58" column="22" lean-forward="true" selection-start-line="58" selection-start-column="22" selection-end-line="58" selection-end-column="22" />
+            <state relative-caret-position="3393">
+              <caret line="285" column="31" lean-forward="true" selection-start-line="285" selection-start-column="31" selection-end-line="285" selection-end-column="31" />
+              <folding>
+                <element signature="n#script#6;n#html#0;n#!!top" />
+                <element signature="n#script#7;n#html#0;n#!!top" />
+                <element signature="e#3114#3584#0" />
+                <element signature="e#3606#3720#0" />
+                <element signature="e#3743#4011#0" />
+                <element signature="e#4036#4668#0" />
+                <element signature="e#4689#4787#0" />
+                <element signature="e#4808#4931#0" />
+                <element signature="e#4953#5159#0" />
+                <element signature="e#5179#5493#0" />
+                <element signature="e#6873#6954#0" />
+                <element signature="e#8867#9323#0" />
+                <element signature="e#9388#9564#0" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/animate/tween/explode.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-3493">
+              <caret line="32" column="52" lean-forward="true" selection-start-line="32" selection-start-column="52" selection-end-line="32" selection-end-column="52" />
+              <folding>
+                <element signature="n#script#7;n#html#0;n#!!top" />
+                <element signature="n#script#8;n#html#0;n#!!top" />
+                <element signature="e#3296#3766#0" />
+                <element signature="e#3788#3902#0" />
+                <element signature="e#3925#4193#0" />
+                <element signature="e#4218#4850#0" />
+                <element signature="e#4871#4969#0" />
+                <element signature="e#4990#5113#0" />
+                <element signature="e#5135#5341#0" />
+                <element signature="e#5361#5675#0" />
+                <element signature="e#7211#7292#0" />
+                <element signature="e#9790#10246#0" />
+                <element signature="e#10311#10487#0" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/animate/tween/single_point.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="330">
+              <caret line="294" column="31" lean-forward="true" selection-start-line="294" selection-start-column="31" selection-end-line="294" selection-end-column="31" />
+              <folding>
+                <element signature="n#head#0;n#html#0;n#!!top" />
+                <element signature="n#style#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/m_basic_demo.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="276">
+              <caret line="297" column="89" lean-forward="true" selection-start-line="297" selection-start-column="37" selection-end-line="297" selection-end-column="89" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/point/w_wave_point.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="495">
+              <caret line="165" column="66" lean-forward="true" selection-start-line="165" selection-start-column="46" selection-end-line="165" selection-end-column="66" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/animate/point_tween.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="308">
+              <caret line="54" column="9" lean-forward="true" selection-start-line="54" selection-start-column="9" selection-end-line="54" selection-end-column="9" />
             </state>
           </provider>
         </entry>
@@ -28,23 +109,24 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/animate/single_point.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="418">
-              <caret line="211" column="14" lean-forward="true" selection-start-line="211" selection-start-column="14" selection-end-line="211" selection-end-column="14" />
+            <state relative-caret-position="1302">
+              <caret line="257" column="85" lean-forward="true" selection-start-line="257" selection-start-column="85" selection-end-line="257" selection-end-column="85" />
               <folding>
                 <element signature="n#style#0;n#head#0;n#html#0;n#!!top" />
                 <element signature="n#style#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
                 <element signature="n#script#7;n#html#0;n#!!top" />
-                <element signature="n#script#8;n#html#0;n#!!top" />
+                <element signature="e#8042#8245#0" />
+                <element signature="e#8275#10657#0" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/animate/point_tween.js">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/point/w_particle_ball_1.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="264">
-              <caret line="8" column="50" selection-start-line="8" selection-start-column="50" selection-end-line="8" selection-end-column="50" />
+            <state relative-caret-position="235">
+              <caret line="207" column="88" lean-forward="true" selection-start-line="207" selection-start-column="88" selection-end-line="207" selection-end-column="107" />
             </state>
           </provider>
         </entry>
@@ -54,8 +136,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="HTML File" />
         <option value="JavaScript File" />
+        <option value="HTML File" />
       </list>
     </option>
   </component>
@@ -72,6 +154,9 @@
       <find>status</find>
       <find>rotate_point</find>
       <find>update</find>
+      <find>line_end_positions</find>
+      <find>animate</find>
+      <find>THREE.Texture</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -89,12 +174,13 @@
         <option value="$PROJECT_DIR$/color/single_point_color.html" />
         <option value="$PROJECT_DIR$/tween/simple_test.html" />
         <option value="$PROJECT_DIR$/point/w_particle_active.html" />
-        <option value="$PROJECT_DIR$/animate/explode.html" />
         <option value="$PROJECT_DIR$/animate/tween/explodeWithTween.html" />
         <option value="$PROJECT_DIR$/animate/tween/simple_test.html" />
         <option value="$PROJECT_DIR$/animate/tween/single_point.html" />
         <option value="$PROJECT_DIR$/animate/single_point.html" />
         <option value="$PROJECT_DIR$/animate/point_tween.js" />
+        <option value="$PROJECT_DIR$/animate/tween/explode.html" />
+        <option value="$PROJECT_DIR$/animate/explode.html" />
       </list>
     </option>
   </component>
@@ -120,6 +206,12 @@
               <item name="4Threejs" type="b2602c69:ProjectViewProjectNode" />
               <item name="4Threejs" type="462c0819:PsiDirectoryNode" />
               <item name="animate" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="4Threejs" type="b2602c69:ProjectViewProjectNode" />
+              <item name="4Threejs" type="462c0819:PsiDirectoryNode" />
+              <item name="animate" type="462c0819:PsiDirectoryNode" />
+              <item name="tween" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="4Threejs" type="b2602c69:ProjectViewProjectNode" />
@@ -178,18 +270,19 @@
       <workItem from="1553736638916" duration="5897000" />
       <workItem from="1553823090702" duration="1198000" />
       <workItem from="1554083659142" duration="9389000" />
-      <workItem from="1554173600922" duration="10782000" />
+      <workItem from="1554173600922" duration="11398000" />
+      <workItem from="1554258976500" duration="9930000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="43388000" />
+    <option name="totallyTimeSpent" value="53934000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1912" y="-8" width="1936" height="1096" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2027897" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.16416308" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -245,13 +338,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="759">
           <caret line="23" column="6" selection-start-line="23" selection-start-column="6" selection-end-line="23" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/m_basic_demo.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="8734">
-          <caret line="283" lean-forward="true" selection-start-line="283" selection-end-line="283" />
         </state>
       </provider>
     </entry>
@@ -389,9 +475,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/three/Tween.js">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
+    <entry file="file://$PROJECT_DIR$/three/Tween.js" />
     <entry file="file://$PROJECT_DIR$/color/shining_color_point.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="132">
@@ -399,65 +483,102 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/animate/tween/explodeWithTween.html">
+    <entry file="file://$PROJECT_DIR$/animate/tween/explodeWithTween.html" />
+    <entry file="file://$PROJECT_DIR$/animate/tween/simple_test.html" />
+    <entry file="file://$PROJECT_DIR$/point/w_wave_point.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="561">
-          <caret line="35" selection-start-line="35" selection-end-line="35" selection-end-column="48" />
-          <folding>
-            <element signature="n#script#6;n#html#0;n#!!top" />
-            <element signature="n#script#7;n#html#0;n#!!top" />
-          </folding>
+        <state relative-caret-position="495">
+          <caret line="165" column="66" lean-forward="true" selection-start-line="165" selection-start-column="46" selection-end-line="165" selection-end-column="66" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/point/w_particle_ball_1.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="499">
-          <caret line="443" column="67" lean-forward="true" selection-start-line="443" selection-start-column="48" selection-end-line="443" selection-end-column="67" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/animate/tween/simple_test.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="561">
-          <caret line="35" selection-start-line="35" selection-end-line="35" selection-end-column="51" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/animate/explode.html">
-      <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="235">
-          <caret line="58" column="22" lean-forward="true" selection-start-line="58" selection-start-column="22" selection-end-line="58" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/animate/tween/single_point.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="297">
-          <caret line="9" column="23" lean-forward="true" selection-end-line="581" />
-          <folding>
-            <element signature="n#style#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-          </folding>
+          <caret line="207" column="88" lean-forward="true" selection-start-line="207" selection-start-column="88" selection-end-line="207" selection-end-column="107" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/animate/single_point.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="418">
-          <caret line="211" column="14" lean-forward="true" selection-start-line="211" selection-start-column="14" selection-end-line="211" selection-end-column="14" />
+        <state relative-caret-position="1302">
+          <caret line="257" column="85" lean-forward="true" selection-start-line="257" selection-start-column="85" selection-end-line="257" selection-end-column="85" />
           <folding>
             <element signature="n#style#0;n#head#0;n#html#0;n#!!top" />
             <element signature="n#style#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
             <element signature="n#script#7;n#html#0;n#!!top" />
-            <element signature="n#script#8;n#html#0;n#!!top" />
+            <element signature="e#8042#8245#0" />
+            <element signature="e#8275#10657#0" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/animate/point_tween.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="264">
-          <caret line="8" column="50" selection-start-line="8" selection-start-column="50" selection-end-line="8" selection-end-column="50" />
+        <state relative-caret-position="308">
+          <caret line="54" column="9" lean-forward="true" selection-start-line="54" selection-start-column="9" selection-end-line="54" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/animate/tween/explode.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-3493">
+          <caret line="32" column="52" lean-forward="true" selection-start-line="32" selection-start-column="52" selection-end-line="32" selection-end-column="52" />
+          <folding>
+            <element signature="n#script#7;n#html#0;n#!!top" />
+            <element signature="n#script#8;n#html#0;n#!!top" />
+            <element signature="e#3296#3766#0" />
+            <element signature="e#3788#3902#0" />
+            <element signature="e#3925#4193#0" />
+            <element signature="e#4218#4850#0" />
+            <element signature="e#4871#4969#0" />
+            <element signature="e#4990#5113#0" />
+            <element signature="e#5135#5341#0" />
+            <element signature="e#5361#5675#0" />
+            <element signature="e#7211#7292#0" />
+            <element signature="e#9790#10246#0" />
+            <element signature="e#10311#10487#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/animate/explode.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3393">
+          <caret line="285" column="31" lean-forward="true" selection-start-line="285" selection-start-column="31" selection-end-line="285" selection-end-column="31" />
+          <folding>
+            <element signature="n#script#6;n#html#0;n#!!top" />
+            <element signature="n#script#7;n#html#0;n#!!top" />
+            <element signature="e#3114#3584#0" />
+            <element signature="e#3606#3720#0" />
+            <element signature="e#3743#4011#0" />
+            <element signature="e#4036#4668#0" />
+            <element signature="e#4689#4787#0" />
+            <element signature="e#4808#4931#0" />
+            <element signature="e#4953#5159#0" />
+            <element signature="e#5179#5493#0" />
+            <element signature="e#6873#6954#0" />
+            <element signature="e#8867#9323#0" />
+            <element signature="e#9388#9564#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/animate/tween/single_point.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="330">
+          <caret line="294" column="31" lean-forward="true" selection-start-line="294" selection-start-column="31" selection-end-line="294" selection-end-column="31" />
+          <folding>
+            <element signature="n#head#0;n#html#0;n#!!top" />
+            <element signature="n#style#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/m_basic_demo.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="276">
+          <caret line="297" column="89" lean-forward="true" selection-start-line="297" selection-start-column="37" selection-end-line="297" selection-end-column="89" />
         </state>
       </provider>
     </entry>
