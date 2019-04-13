@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            margin: 0;
+            height: 100%;
+        }
+
+        canvas {
+            display: block;
+        }
+
+
+        #main {
+            border: solid 1px black;
+        }
+    </style>
+</head>
+<body>
+<canvas id="main"></canvas>
+<button onclick="changeCameraPosition()">change Camera Position</button>
+<button onclick="changeCameraLookAt()">change Camera Look At</button>
+<button onclick="changeUp()">change camera up</button>
+<button onclick="changeOcTarget()">change oc target</button>
+<button onclick="dynamicMove()">dynamic move</button>
+</body>
+<script src="../three/WebGL.js"></script>
+<script src="../three/three.js"></script>
+<script src="../three/stats.min.js"></script>
+<script src="../three/OrbitControls.js"></script>
+<script src="../three/dat.gui.min.js"></script>
+<script src="../three/STLLoader.js"></script>
+<script type="x-shader/x-vertex" id="vertexshader">
+                attribute float size;
+                attribute vec3 customColor;
+                varying vec3 vColor;
+                void main() {
+                    vColor = customColor;
+                    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+                    gl_PointSize = size * ( 300.0 / -mvPosition.z );
+                    gl_Position = projectionMatrix * mvPosition;
+                }
+            </script>
+<script type="x-shader/x-fragment" id="fragmentshader">
+                uniform vec3 color;
+                uniform sampler2D texture;
+                varying vec3 vColor;
+                void main() {
+                    gl_FragColor = vec4( color * vColor, 1.0 );
+                    gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
+                    if ( gl_FragColor.a < ALPHATEST ) discard;
+                }
+            </script>
+<script>
+	class MyThree {
+        data = void 0;
+        w = window.innerWidth;
+        h = 400;
+        dom = void 0;
+
+        renderer = void 0;
+        scene = void 0;
+        camera = void 0;
+        // animate
+        clock = new THREE.Clock();
+        // event
+        raycaster = new THREE.Raycaster();
+        mouse = new THREE.Vector2();
+        mouse_down_handle = void 0;
+        // control
+        controls = void 0;
+        // test
+        is_test = true;
+        is_init_control = true;
+        state = void 0;
+        test_control = {
+            is_enable_animate: true,
+            is_enable_event: true,
+        };
+
+        // mesh
+        mesh = void 0;
+        points = void 0;
+        positions = void 0;
+        request_id = 0;
+
+        // camera control
+        is_position_change = false;
+        lookat_or_target = void 0;
+
+        constructor(dom, data) {
+            this.data =data;
+            this.dom = dom;
+            this.init();
+
+            let position_arr = this.points.geometry.attributes.position.array;
+            // let vector = new THREE.Vector3(
+            //     position_arr[0],
+            //     position_arr[1],
+            //     position_arr[2],
+            // );
+            let vector = new THREE.Vector3(
+                100, 0, 0
+            );
+
+            this.lookat_or_target = vector;
+            this.animate();
+        }
+
+        init() {
+            this.initCanvas();
+            this.initRenderer();
+            this.initScene();
+            this.initCamera();
+
+            if (this.is_init_control) {
+                this.initControls();
+            }
+
+            if (this.is_test) {
+                this.initTest();
+            }
+
+            this.initMesh();
+            this.addEvent();
+        }
+
+        initCanvas() {
+            this.dom.style.width = this.w + 'px';
+            this.dom.style.height = this.h + 'px';
+        }
+
+        initRenderer() {
+            if (this.renderer === void 0) {
+                this.renderer = new THREE.WebGLRenderer({
+                    canvas: this.dom,
+                    // 在 css 中设置背景色透明显示渐变色
+                    alpha: true,
+                    // 开启抗锯齿
+                    antialias: false
+                });
+
+                // 这句要加，否则镜头会发虚
+                this.renderer.setSize(this.w, this.h);
+                this.renderer.setClearColor(0x000000);
+            }
+        }
+
+        initScene() {
+            if (this.scene === void 0) {
+                this.scene = new THREE.Scene();
+            }
+        }
+
+        initCamera() {
+            if (this.camera === void 0) {
+                this.camera = new THREE.PerspectiveCamera(45, this.w / this.h, 1, 10000);
+                this.camera.position.set(1, 1, 1);
+                // this.camera.lookAt(this.scene.position);
+            }
+        }
+
+        initControls() {
+            this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+            // 使动画循环使用时阻尼或自转 意思是否有惯性
+            this.controls.enableDamping = true;
+            //动态阻尼系数 就是鼠标拖拽旋转灵敏度
+            //this.controls.dampingFactor = 0.25;
+            //是否可以缩放
+            this.controls.enableZoom = true;
+            //是否自动旋转
+            this.controls.autoRotate = false;
+            //设置相机距离原点的最远距离
+            // this.controls.minDistance = 20;
+            //设置相机距离原点的最远距离
+            this.controls.maxDistance = 10000;
+            //是否开启右键拖拽 手机上可以禁止拖拽中心
+            this.controls.enablePan = false;
+        }
+
+        initTest() {
+            this.initAxes();
+            this.initState();
+            this.initGui();
+        }
+
+        initAxes() {
+            //轴辅助 （每一个轴的长度）
+            let axes = new THREE.AxesHelper(500);
+            this.scene.add(axes);
+        }
+
+        initState() {
+            this.stats = new Stats();
+            this.stats.dom.style.position = 'absolute';
+            this.stats.dom.style.top = '0px';
+            document.body.appendChild(this.stats.dom);
+        }
+
+        initGui() {
+            let gui = new dat.GUI();
+            gui.add(this.test_control, 'is_enable_animate').onChange((value) => {
+                console.log(value);
+            });
+            gui.add(this.test_control, 'is_enable_event').onChange((value) => {
+                console.log(value);
+            });
+        }
+
+        initMesh() {
+            let count = 1;
+            let lst = [
+                {
+                    name: 'position',
+                    data: this.getPositionsLst(count, [{
+                        x: 30,
+                        y: 0,
+                        z: -60,
+                    }]),
+                    item_size: 3,
+                },
+                {
+                    name: 'color',
+                    data: this.getColorsLst(count),
+                    item_size: 3,
+                }
+            ];
+
+            let geometry = this.createGeometry(lst);
+            let material = this.createMaterial();
+
+            this.points = new THREE.Points(geometry, material);
+            this.scene.add(this.points);
+        }
+
+        getColorsLst(count, color = new THREE.Color(0xffffff)) {
+            let lst = [];
+
+            for (var i = 0; i < count; i++) {
+                lst.push(color.r);
+                lst.push(color.g);
+                lst.push(color.b);
+            }
+
+            return lst;
+        }
+
+        getPositionsLst(count, position_obj_lst) {
+            let lst = [];
+
+            if (position_obj_lst) {
+                for (var i = 0; i < count; i++) {
+                    let obj = position_obj_lst[i];
+
+                    if (obj) {
+                        lst.push(obj.x);
+                        lst.push(obj.y);
+                        lst.push(obj.z);
+                    }
+                    else {
+                        lst.push((Math.random() * 2 - 1) * 50);
+                        lst.push((Math.random() * 2 - 1) * 50);
+                        lst.push((Math.random() * 2 - 1) * 50);
+                    }
+                }
+            }
+            else {
+                for  (var i = 0; i < count; i++) {
+                    lst.push((Math.random() * 2 - 1) * 50);
+                    lst.push((Math.random() * 2 - 1) * 50);
+                    lst.push((Math.random() * 2 - 1) * 50);
+                }
+            }
+
+            return lst;
+        }
+
+        createGeometry(lst) {
+            let geometry = new THREE.BufferGeometry();
+
+            for (var obj of lst) {
+
+                let name = obj.name;
+                let data = obj.data;
+                let item_size = obj.item_size;
+
+                if (Array.isArray(data)) {
+                    data = new Float32Array(data);
+                }
+                else if (Object.prototype.toString.call(data) === "[object Object]") {
+                    switch(name) {
+                        case 'position':
+                            data = new Float32Array([data.x, data.y, data.z]);
+                            break;
+                        case 'color':
+                            data = new Float32Array([data.r, data.g, data.b]);
+                            break;
+                        default:
+                            console.error(`createGeometry error, data is ${data}`);
+                            break;
+                    }
+                }
+
+                geometry.addAttribute(name, new THREE.BufferAttribute(data, item_size));
+            }
+
+            return geometry;
+        }
+
+        createMaterial(material_type = 0, shader_type = 0) {
+            let result = null;
+            let shader = this.getShader(shader_type);
+            let vertex = shader.vertex;
+            let fragment = shader.fragment;
+
+            switch(material_type) {
+                case 0:
+                default:
+                    result = new THREE.PointsMaterial({
+                        // color: 0xffffff,
+                        size: 40,
+                        // vertexColors: true, // 是否为几何体的每个顶点应用颜色，默认值是为所有面应用材质的颜色
+                        // blending: THREE.NoBlending,
+                        blending: THREE.AdditiveBlending,
+                        map: this.anotherSprite(),
+                        sizeAttenuation: true,
+                        opacity: 1,
+                        transparent: true,
+                        depthTest: false,
+                        side: THREE.DoubleSide,
+                    });
+                    break;
+                case 1:
+                    result = new THREE.ShaderMaterial( {
+                        color: 0xffffff,
+                        uniforms: {
+                            color: { value: new THREE.Color( 0xffffff ) },
+                            texture: {
+                                value: this.anotherSprite(),
+                            }
+                        },
+                        vertexShader: vertex,
+                        fragmentShader: fragment,
+                        blending: THREE.AdditiveBlending,
+                        depthTest: false,
+                        transparent: true,
+                        vertexColors: true,
+                        side: THREE.DoubleSide,
+                    } );
+                    break;
+            }
+
+            return result;
+        }
+
+        getShader(type = 1) {
+            let result = {
+                vertex: '',
+                fragment: '',
+            };
+
+            switch(type) {
+                case 0:
+                    result.vertex = `
+                        attribute float size;
+                        varying vec3 vColor;
+                        void main() {
+                            vColor = color;
+                            vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+                            gl_PointSize = size * ( 300.0 / -mvPosition.z );
+                            gl_Position = projectionMatrix * mvPosition;
+                        }
+                    `;
+                    result.fragment = `
+                        uniform sampler2D texture;
+                        varying vec3 vColor;
+                        void main() {
+                            gl_FragColor = vec4( vColor, 1.0 );
+                            gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
+                        }
+                    `;
+                    break;
+                case 1:
+                default:
+                    result.vertex = `
+                        attribute float size;
+                        attribute vec3 customColor;
+                        varying vec3 vColor;
+                        void main() {
+                            vColor = customColor;
+                            vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+                            gl_PointSize = size * ( 300.0 / -mvPosition.z );
+                            gl_Position = projectionMatrix * mvPosition;
+                        }
+                    `;
+                    result.fragment = `
+                        uniform vec3 color;
+                        uniform sampler2D texture;
+                        varying vec3 vColor;
+                        void main() {
+                            gl_FragColor = vec4( color * vColor, 1.0 );
+                            gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
+                            if ( gl_FragColor.a < ALPHATEST ) discard;
+                        }
+                    `;
+                    break;
+            }
+
+            return result;
+        }
+
+        render() {
+            this.renderer.render(this.scene, this.camera);
+        }
+
+        animate() {
+            if (this.is_test) {
+                this.stats.update();
+            }
+
+            if (this.test_control.is_enable_animate) {
+
+            }
+
+            let x = this.camera.position.x;
+            // 设置了OrbitControls, 镜头在过原点的时候会反转，因为有个镜头和原点最小距离的设置。
+            if (this.is_position_change && x < 100) {
+                this.camera.position.x += 1;
+            }
+
+            if (this.is_init_control) {
+                let delta = this.clock.getDelta();
+                this.controls.update(delta);
+            }
+
+            this.render();
+
+            this.request_id = requestAnimationFrame(() => {
+                this.animate();
+            });
+
+        }
+
+        addEvent() {
+            this.mouse_down_handle = this.mouseDownHandle.bind(this);
+            this.dom.addEventListener('mousedown', this.mouse_down_handle);
+        }
+
+        mouseDownHandle(event) {
+            if (this.test_control.is_enable_event) {
+                this.mouse.x = ((event.clientX  - dom.getBoundingClientRect().left) / this.w) * 2 - 1;
+                this.mouse.y = - ((event.clientY - dom.getBoundingClientRect().top) / this.h) * 2 + 1;
+                this.raycaster.setFromCamera(this.mouse, this.camera);
+
+                if (this.points) {
+                    let intersects = this.raycaster.intersectObjects(this.points);
+                    if (intersects.length > 0) {
+                        console.log(intersects[0].index);
+                    }
+                }
+
+                if (this.mesh) {
+                    let intersects = this.raycaster.intersectObjects(this.points);
+                    if (intersects.length > 0) {
+                        console.log(intersects[0].index);
+                    }
+                }
+            }
+        }
+
+        destroy(is_complete = false) {
+            if (is_complete) {
+                this.dom.removeEventListener('mousedown', this.mouse_down_handle);
+                window.cancelAnimationFrame(this.request_id);
+
+                this.dom = void 0;
+
+                if (this.controls) {
+                    this.controls.dispose();
+                    this.controls = void 0;
+                }
+
+                if (this.gui) {
+                    this.gui.destroy();
+                    this.gui = void 0;
+                }
+
+                if (this.group) {
+                    this.group.remove(this.points);
+                    this.scene.remove(this.group);
+                }
+                else {
+                    this.scene.remove(this.points);
+                }
+
+                if (this.points) {
+                    let geometry = this.points.geometry;
+                    let material = this.points.material;
+
+                    if (material) {
+                        let texture = material.map;
+
+                        if (texture) {
+                            texture.dispose();
+                        }
+                    }
+
+                    geometry.dispose();
+                    material.dispose();
+                }
+
+                this.scene.remove(this.camera);
+                this.scene.dispose();
+                this.renderer.dispose();
+            }
+            else {
+                if (this.group) {
+                    this.group.remove(this.points);
+                    this.scene.remove(this.group);
+                }
+                else {
+                    this.scene.remove(this.points);
+                }
+
+                if (this.points) {
+                    let geometry = this.points.geometry;
+                    let material = this.points.material;
+
+                    if (material) {
+                        let texture = material.map;
+
+                        if (texture) {
+                            texture.dispose();
+                        }
+                    }
+
+                    geometry.dispose();
+                    material.dispose();
+                }
+            }
+        }
+
+        createCanvasMaterial(color = '#FFFFFF' , size = 256) {
+            let matCanvas = document.createElement('canvas');
+            matCanvas.width = matCanvas.height = size;
+            let matContext = matCanvas.getContext('2d');
+            // create exture object from canvas.
+            let texture = new THREE.Texture(matCanvas);
+            // Draw a circle
+            let center = size/2;
+            matContext.beginPath();
+            matContext.arc(center, center, size/2, 0, 2 * Math.PI, false);
+            matContext.closePath();
+            matContext.fillStyle = color;
+            matContext.fill();
+            // need to set needsUpdate
+            texture.needsUpdate = true;
+            // return a texture made from the canvas
+            return texture;
+        }
+
+        generateSprite() {
+            let canvas = document.createElement('canvas');
+            canvas.width = 16;
+            canvas.height = 16;
+
+            let context = canvas.getContext('2d');
+            let gradient = context.createRadialGradient(canvas.width / 2, canvas.height / 2, 0, canvas.width / 2, canvas.height / 2, canvas.width / 2);
+            gradient.addColorStop(0, 'rgba(255,255,255,1)');
+            gradient.addColorStop(0.2, 'rgba(0,255,255,1)');
+            gradient.addColorStop(0.4, 'rgba(0,0,64,1)');
+            gradient.addColorStop(1, 'rgba(0,0,0,1)');
+            context.fillStyle = gradient;
+            context.fillRect(0, 0, canvas.width, canvas.height);
+
+            let texture = new THREE.Texture(canvas);
+            texture.needsUpdate = true;
+            return texture;
+
+        }
+
+        getCircle(size = 512) {
+            let matCanvas = document.createElement('canvas');
+            matCanvas.width = matCanvas.height = size;
+            let matContext = matCanvas.getContext('2d');
+            // create exture object from canvas.
+            let texture = new THREE.Texture(matCanvas);
+            // Draw a circle
+            let center = size/2;
+            matContext.beginPath();
+            matContext.arc(center, center, size/2, 0, 2 * Math.PI, false);
+            matContext.closePath();
+            matContext.fillStyle = 'rgba(255,255,255,1)';
+            // matContext.fillStyle = 'rgba(0,0,0,1)';
+            matContext.fill();
+            // need to set needsUpdate
+            texture.needsUpdate = true;
+            // return a texture made from the canvas
+            return texture;
+        }
+
+        anotherSprite() {
+            var canvas = document.createElement('canvas');
+            canvas.width = 128;
+            canvas.height = 128;
+            let texture = new THREE.Texture(canvas);
+            var ctx = canvas.getContext('2d');
+            var gradient = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, 0, canvas.width / 2, canvas.height / 2, canvas.width / 2);
+            gradient.addColorStop(0, 'rgba(255,255,255,1)');
+            gradient.addColorStop(0.2, 'rgba(240,255,240,1)');
+            gradient.addColorStop(0.22, 'rgba(0,150,255,.2)');
+            gradient.addColorStop(1, 'rgba(0,50,255,0)');
+            ctx.fillStyle = gradient; // "#FFFFFF"; // gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            texture.needsUpdate = true;
+
+            return texture;
+        }
+
+        badPointSprite() {
+            var canvas = document.createElement('canvas');
+            canvas.width = 128;
+            canvas.height = 128;
+            let texture = new THREE.Texture(canvas);
+            var ctx = canvas.getContext('2d');
+            var gradient = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, 0, canvas.width / 2, canvas.height / 2, canvas.width / 2);
+            // gradient.addColorStop(0, 'rgba(255,193,193,1)');
+            gradient.addColorStop(0, 'rgba(255,48,48,1)');
+            gradient.addColorStop(0.2, 'rgba(255, 0, 0,1)');
+            gradient.addColorStop(0.22, 'rgba(238, 44, 44,.2)');
+            gradient.addColorStop(1, 'rgba(250,128,114,0)');
+            ctx.fillStyle = gradient; // "#FFFFFF"; // gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            texture.needsUpdate = true;
+
+            return texture;
+        }
+
+        changeCameraPosition() {
+            // console.log(this.camera.position);
+            // this.camera.position.set(0, 1000, 100);
+            // this.camera.updateProjectionMatrix();
+            // this.render();
+
+            this.is_position_change = !this.is_position_change;
+        }
+
+        changeCameraLookAt() {
+            this.camera.lookAt(this.lookat_or_target);
+        }
+
+        changeOcTarget() {
+            if (this.controls) {
+                this.controls.target = this.lookat_or_target;
+            }
+        }
+
+        changeUp() {
+            // this.controls.target = this.lookat_or_target;
+            this.controls.target = new THREE.Vector3(0, 0, 0);
+            this.camera.up = new THREE.Vector3(0, 0, 1);
+            // this.camera.up.x = 1;
+            // this.camera.updateProjectionMatrix();
+        }
+
+        dynamicMove() {
+
+        }
+    }
+
+    let dom = document.querySelector('#main');
+    let myTree = new MyThree(dom);
+
+    function changeCameraPosition() {
+        myTree.changeCameraPosition();
+    }
+
+    function changeCameraLookAt() {
+        myTree.changeCameraLookAt();
+    }
+
+    function changeOcTarget() {
+        myTree.changeOcTarget();
+    }
+
+    function changeUp() {
+        myTree.changeUp();
+    }
+
+    function dynamicMove() {
+        myTree.dynamicMove();
+    }
+
+	</script>
+</html>
+
+

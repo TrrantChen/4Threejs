@@ -36,7 +36,8 @@
 <script src="../../three/OrbitControls.js"></script>
 <script src="../../three/dat.gui.min.js"></script>
 <script src="../../three/STLLoader.js"></script>
-<script src="../../three/tween.min.js"></script>
+<!--<script src="../../three/tween.min.js"></script>-->
+<script src="../../three/tween.js"></script>
 <script type="x-shader/x-vertex" id="vertexshader">
                 attribute float size;
                 attribute vec3 customColor;
@@ -198,17 +199,13 @@
         }
 
         createOnePointByPointMaterial() {
-            let count = 2;
+            let count = 1;
             let positions = this.getPositions(count,[{
                 x: 0,
                 y: 0,
                 z: 0,
             },
-            {
-                x: 20,
-                y: 20,
-                z: 20,
-            }]);
+            ]);
 
             let colors = this.getColors(count, {
                 r: 1,
@@ -255,42 +252,42 @@
             //         .start();
             // }
 
-            // this.tween = new TWEEN.Tween(this.points.position)
-            //     .to({
-            //         x: 20,
-            //         y: 20,
-            //         z: 20,
-            //     }, 500)
-            //     .start();
+            this.tween = new TWEEN.Tween(this.points.position)
+                .to({
+                    x: 20,
+                    y: 20,
+                    z: 20,
+                }, 3000)
+                .start();
 
-            this.tween = new TWEEN.Tween({val: 1}).to({val: 0}, 5000);
-            this.tween.easing(TWEEN.Easing.Quadratic.InOut).delay(1000).onUpdate((val) => {
-
-                for (var i = 0; i < count; i++) {
-                    let x = this.points.geometry.attributes.position.array[i + 3];
-                    let y = this.points.geometry.attributes.position.array[i + 3 + 1];
-                    let z = this.points.geometry.attributes.position.array[i + 3 + 2];
-
-                    let _x = x + 10 * val;
-                    let _y = y + 10 * val;
-                    let _z = z + 10 * val;
-
-                    if (i === 1) {
-                        console.log('===================');
-                        console.log(x);
-                        console.log(val);
-                        console.log(_x);
-                        console.log('===================');
-                    }
-
-
-                    this.points.geometry.attributes.position.array[i + 3] = _x;
-                    this.points.geometry.attributes.position.array[i + 3 + 1] = _y;
-                    this.points.geometry.attributes.position.array[i + 3 + 2] = _z;
-                    this.points.geometry.attributes.position.needsUpdate = true;
-                }
-
-            });
+            // this.tween = new TWEEN.Tween({val: 1}).to({val: 0}, 5000);
+            // this.tween.easing(TWEEN.Easing.Quadratic.InOut).delay(1000).onUpdate((val) => {
+            //
+            //     for (var i = 0; i < count; i++) {
+            //         let x = this.points.geometry.attributes.position.array[i + 3];
+            //         let y = this.points.geometry.attributes.position.array[i + 3 + 1];
+            //         let z = this.points.geometry.attributes.position.array[i + 3 + 2];
+            //
+            //         let _x = x + 10 * val;
+            //         let _y = y + 10 * val;
+            //         let _z = z + 10 * val;
+            //
+            //         if (i === 1) {
+            //             console.log('===================');
+            //             console.log(x);
+            //             console.log(val);
+            //             console.log(_x);
+            //             console.log('===================');
+            //         }
+            //
+            //
+            //         this.points.geometry.attributes.position.array[i + 3] = _x;
+            //         this.points.geometry.attributes.position.array[i + 3 + 1] = _y;
+            //         this.points.geometry.attributes.position.array[i + 3 + 2] = _z;
+            //         this.points.geometry.attributes.position.needsUpdate = true;
+            //     }
+            //
+            // });
 
             this.tween.start();
 

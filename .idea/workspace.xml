@@ -1,7 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="0c120a61-310d-461e-93dd-569b0e349f28" name="Default Changelist" comment="" />
+    <list default="true" id="0c120a61-310d-461e-93dd-569b0e349f28" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/animate/explode.html" beforeDir="false" afterPath="$PROJECT_DIR$/animate/explode.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/animate/point_tween.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/animate/single_point.html" beforeDir="false" afterPath="$PROJECT_DIR$/animate/single_point.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/animate/tween/single_point.html" beforeDir="false" afterPath="$PROJECT_DIR$/animate/tween/single_point.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/camera/camera_test1.html" beforeDir="false" afterPath="$PROJECT_DIR$/camera/m_camera_test1.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/camera/m_camera_lookat_up.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/camera/w-demo1.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/util.js" beforeDir="false" afterPath="$PROJECT_DIR$/util.js" afterDir="false" />
+    </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
     <ignored path="$PROJECT_DIR$/tmp/" />
@@ -14,90 +24,54 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/camera/camera_test1.html">
+        <entry file="file://$PROJECT_DIR$/util.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="672">
-              <caret line="436" column="12" lean-forward="true" selection-start-line="436" selection-start-column="12" selection-end-line="436" selection-end-column="12" />
+            <state relative-caret-position="675">
+              <caret line="43" column="21" selection-start-line="43" selection-start-column="13" selection-end-line="43" selection-end-column="21" />
               <folding>
-                <element signature="e#2717#2838#0" />
-                <element signature="e#2546#2854#0" />
-                <element signature="e#2877#2989#0" />
-                <element signature="e#3014#3484#0" />
-                <element signature="e#3506#3620#0" />
-                <element signature="e#4586#4684#0" />
-                <element signature="e#4705#4828#0" />
-                <element signature="e#4850#5056#0" />
-                <element signature="e#5076#5390#0" />
-                <element signature="e#5411#5423#0" />
-                <element signature="e#5550#5595#0" />
-                <element signature="e#5773#5835#0" />
-                <element signature="e#6285#6438#0" />
-                <element signature="e#5461#6553#0" />
-                <element signature="e#6676#6939#0" />
-                <element signature="e#7024#7048#0" />
-                <element signature="e#6734#6804#0" />
-                <element signature="e#7218#7375#0" />
-                <element signature="e#7408#8293#0" />
-                <element signature="e#13247#15363#0" />
-                <element signature="e#13646#13756#0" />
-                <element signature="e#13774#13837#0" />
-                <element signature="e#13868#14262#0" />
-                <element signature="e#13229#13261#0" />
-                <element signature="e#14826#15264#0" />
-                <element signature="e#8466#9198#0" />
-                <element signature="e#9225#10027#0" />
-                <element signature="e#10059#10862#0" />
-                <element signature="e#13419#14182#0" />
-                <element signature="e#14205#15029#0" />
+                <element signature="n#!!block;n#setStartCallback#0;n#Tween#0" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/camera/w-demo1.html">
+        <entry file="file://$PROJECT_DIR$/camera/m_active_camera_move.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2013">
-              <caret line="67" column="51" lean-forward="true" selection-start-line="67" selection-start-column="51" selection-end-line="67" selection-end-column="51" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/camera/w-camera.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="264">
-              <caret line="170" column="39" selection-start-line="170" selection-start-column="31" selection-end-line="170" selection-end-column="39" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/GLSL/circle_test1.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="103">
-              <caret line="205" lean-forward="true" selection-start-line="205" selection-end-line="205" />
+            <state relative-caret-position="144">
+              <caret line="58" column="22" lean-forward="true" selection-start-line="58" selection-start-column="22" selection-end-line="58" selection-end-column="22" />
               <folding>
-                <element signature="e#10020#12114#0" />
+                <element signature="n#script#6;n#html#0;n#!!top" />
+                <element signature="n#script#7;n#html#0;n#!!top" />
+                <element signature="e#1837#21321#0" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/camera/m_camera_lookat_up.html">
+        <entry file="file://$PROJECT_DIR$/camera/m_camera_test1.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1573">
-              <caret line="59" column="25" lean-forward="true" selection-start-line="59" selection-start-column="25" selection-end-line="59" selection-end-column="25" />
+            <state relative-caret-position="-183">
+              <caret line="681" column="13" selection-start-line="681" selection-start-column="13" selection-end-line="681" selection-end-column="13" />
+              <folding>
+                <element signature="e#1988#22645#0" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/color/color_dymatic_change.html">
+        <entry file="file://$PROJECT_DIR$/animate/single_point.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="4063">
-              <caret line="148" column="41" selection-start-line="148" selection-start-column="41" selection-end-line="148" selection-end-column="41" />
+            <state relative-caret-position="187">
+              <caret line="61" column="39" lean-forward="true" selection-start-line="61" selection-start-column="4" selection-end-line="61" selection-end-column="39" />
+              <folding>
+                <element signature="n#style#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#canvas#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+                <element signature="n#script#6;n#html#0;n#!!top" />
+                <element signature="n#script#7;n#html#0;n#!!top" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -107,14 +81,13 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="JavaScript File" />
         <option value="HTML File" />
+        <option value="JavaScript File" />
       </list>
     </option>
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>setClear</find>
       <find>setColor</find>
       <find>initControls</find>
       <find>this.rotate_point</find>
@@ -137,6 +110,14 @@
       <find>THREE.Points</find>
       <find>getPositionsLst</find>
       <find>is_position_change</find>
+      <find>is_target_change</find>
+      <find>is_init_control</find>
+      <find>_duration</find>
+      <find>this._object</find>
+      <find>_object</find>
+      <find>performance</find>
+      <find>debugger</find>
+      <find>cameraMove</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -156,29 +137,34 @@
         <option value="$PROJECT_DIR$/point/w_particle_active.html" />
         <option value="$PROJECT_DIR$/animate/tween/explodeWithTween.html" />
         <option value="$PROJECT_DIR$/animate/tween/simple_test.html" />
-        <option value="$PROJECT_DIR$/animate/tween/single_point.html" />
-        <option value="$PROJECT_DIR$/animate/single_point.html" />
         <option value="$PROJECT_DIR$/animate/point_tween.js" />
         <option value="$PROJECT_DIR$/animate/tween/explode.html" />
-        <option value="$PROJECT_DIR$/animate/explode.html" />
         <option value="$PROJECT_DIR$/camera/w-camera.html" />
         <option value="$PROJECT_DIR$/camera/w-demo1.html" />
         <option value="$PROJECT_DIR$/camera/camera_test1.html" />
+        <option value="$PROJECT_DIR$/camera/w-camera-test.html" />
+        <option value="$PROJECT_DIR$/camera/active_camera_move.html" />
+        <option value="$PROJECT_DIR$/camera/util.js" />
+        <option value="$PROJECT_DIR$/animate/tween/single_point.html" />
+        <option value="$PROJECT_DIR$/three/tween.js" />
+        <option value="$PROJECT_DIR$/animate/explode.html" />
+        <option value="$PROJECT_DIR$/util.js" />
+        <option value="$PROJECT_DIR$/animate/single_point.html" />
+        <option value="$PROJECT_DIR$/camera/m_active_camera_move.html" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="1912" />
+    <option name="x" value="-8" />
     <option name="y" value="-8" />
     <option name="width" value="1936" />
-    <option name="height" value="1096" />
+    <option name="height" value="1056" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -189,22 +175,18 @@
             <path>
               <item name="4Threejs" type="b2602c69:ProjectViewProjectNode" />
               <item name="4Threejs" type="462c0819:PsiDirectoryNode" />
+              <item name="animate" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="4Threejs" type="b2602c69:ProjectViewProjectNode" />
+              <item name="4Threejs" type="462c0819:PsiDirectoryNode" />
               <item name="camera" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="4Threejs" type="b2602c69:ProjectViewProjectNode" />
-              <item name="4Threejs" type="462c0819:PsiDirectoryNode" />
-              <item name="GLSL" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="4Threejs" type="b2602c69:ProjectViewProjectNode" />
-              <item name="4Threejs" type="462c0819:PsiDirectoryNode" />
-              <item name="three" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -254,18 +236,22 @@
       <workItem from="1554083659142" duration="9389000" />
       <workItem from="1554173600922" duration="11398000" />
       <workItem from="1554258976500" duration="9930000" />
-      <workItem from="1554688155758" duration="13312000" />
+      <workItem from="1554688155758" duration="13990000" />
+      <workItem from="1554774531014" duration="12954000" />
+      <workItem from="1554947348892" duration="8389000" />
+      <workItem from="1555034165450" duration="672000" />
+      <workItem from="1555036642857" duration="11954000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="67246000" />
+    <option name="totallyTimeSpent" value="101893000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="1912" y="-8" width="1936" height="1096" extended-state="6" />
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.12607296" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.17918456" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -441,7 +427,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/three/Tween.js" />
     <entry file="file://$PROJECT_DIR$/color/shining_color_point.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="132">
@@ -451,16 +436,6 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/animate/tween/explodeWithTween.html" />
     <entry file="file://$PROJECT_DIR$/animate/tween/simple_test.html" />
-    <entry file="file://$PROJECT_DIR$/animate/explode.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="9075">
-          <caret line="285" column="31" selection-start-line="285" selection-start-column="31" selection-end-line="285" selection-end-column="31" />
-          <folding>
-            <element signature="n#script#7;n#html#0;n#!!top" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/animate/tween/explode.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1056">
@@ -472,40 +447,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/animate/tween/single_point.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="8943">
-          <caret line="294" column="31" selection-start-line="294" selection-start-column="31" selection-end-line="294" selection-end-column="31" />
-          <folding>
-            <element signature="n#head#0;n#html#0;n#!!top" />
-            <element signature="n#style#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/point/w_wave_point.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="5445">
           <caret line="165" column="66" selection-start-line="165" selection-start-column="46" selection-end-line="165" selection-end-column="66" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/animate/point_tween.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1782">
-          <caret line="54" column="9" selection-start-line="54" selection-start-column="9" selection-end-line="54" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/animate/single_point.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="7557">
-          <caret line="257" column="85" lean-forward="true" selection-start-line="257" selection-start-column="85" selection-end-line="257" selection-end-column="85" />
-          <folding>
-            <element signature="n#style#0;n#head#0;n#html#0;n#!!top" />
-            <element signature="n#style#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#script#7;n#html#0;n#!!top" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -523,79 +468,172 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/color/color_dymatic_change.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4063">
-          <caret line="148" column="41" selection-start-line="148" selection-start-column="41" selection-end-line="148" selection-end-column="41" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/camera/m_camera_lookat_up.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1573">
-          <caret line="59" column="25" lean-forward="true" selection-start-line="59" selection-start-column="25" selection-end-line="59" selection-end-column="25" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/camera/m_camera_lookat_up.html" />
     <entry file="file://$PROJECT_DIR$/GLSL/circle_test1.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="103">
-          <caret line="205" lean-forward="true" selection-start-line="205" selection-end-line="205" />
+        <state relative-caret-position="781">
+          <caret line="205" selection-start-line="205" selection-end-line="205" />
           <folding>
             <element signature="e#10020#12114#0" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/color/color_dymatic_change.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="781">
+          <caret line="148" column="41" selection-start-line="148" selection-start-column="41" selection-end-line="148" selection-end-column="41" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/camera/w-camera.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="264">
-          <caret line="170" column="39" selection-start-line="170" selection-start-column="31" selection-end-line="170" selection-end-column="39" />
+        <state relative-caret-position="88">
+          <caret line="149" column="23" lean-forward="true" selection-start-line="149" selection-start-column="23" selection-end-line="149" selection-end-column="23" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/camera/w-demo1.html">
+    <entry file="file://$PROJECT_DIR$/camera/w-demo1.html" />
+    <entry file="file://$PROJECT_DIR$/three/tween.min.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2013">
-          <caret line="67" column="51" lean-forward="true" selection-start-line="67" selection-start-column="51" selection-end-line="67" selection-end-column="51" />
+        <state>
+          <caret column="45" lean-forward="true" selection-start-column="14" selection-end-column="45" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/camera/camera_test1.html">
+    <entry file="file://$PROJECT_DIR$/three/TweenMax.min.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="672">
-          <caret line="436" column="12" lean-forward="true" selection-start-line="436" selection-start-column="12" selection-end-line="436" selection-end-column="12" />
+        <state>
           <folding>
-            <element signature="e#2717#2838#0" />
-            <element signature="e#2546#2854#0" />
-            <element signature="e#2877#2989#0" />
-            <element signature="e#3014#3484#0" />
-            <element signature="e#3506#3620#0" />
-            <element signature="e#4586#4684#0" />
-            <element signature="e#4705#4828#0" />
-            <element signature="e#4850#5056#0" />
-            <element signature="e#5076#5390#0" />
-            <element signature="e#5411#5423#0" />
-            <element signature="e#5550#5595#0" />
-            <element signature="e#5773#5835#0" />
-            <element signature="e#6285#6438#0" />
-            <element signature="e#5461#6553#0" />
-            <element signature="e#6676#6939#0" />
-            <element signature="e#7024#7048#0" />
-            <element signature="e#6734#6804#0" />
-            <element signature="e#7218#7375#0" />
-            <element signature="e#7408#8293#0" />
-            <element signature="e#13247#15363#0" />
-            <element signature="e#13646#13756#0" />
-            <element signature="e#13774#13837#0" />
-            <element signature="e#13868#14262#0" />
-            <element signature="e#13229#13261#0" />
-            <element signature="e#14826#15264#0" />
-            <element signature="e#8466#9198#0" />
-            <element signature="e#9225#10027#0" />
-            <element signature="e#10059#10862#0" />
-            <element signature="e#13419#14182#0" />
-            <element signature="e#14205#15029#0" />
+            <element signature="n#!!doc" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/three/tween.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="89">
+          <caret line="384" column="9" lean-forward="true" selection-start-line="384" selection-start-column="9" selection-end-line="384" selection-end-column="9" />
+          <folding>
+            <element signature="e#422#521#0" />
+            <element signature="e#549#573#0" />
+            <element signature="e#600#694#0" />
+            <element signature="e#724#816#0" />
+            <element signature="e#1669#1695#0" />
+            <element signature="e#1709#1747#0" />
+            <element signature="e#2463#2489#0" />
+            <element signature="e#2537#2602#0" />
+            <element signature="n#!!block;n#assign#0" />
+            <element signature="e#3560#3583#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/animate/tween/single_point.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="781">
+          <caret line="259" column="23" selection-start-line="259" selection-start-column="19" selection-end-line="259" selection-end-column="23" />
+          <folding>
+            <element signature="n#head#0;n#html#0;n#!!top" />
+            <element signature="n#style#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/camera/util.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="33">
+          <caret line="1" selection-start-line="1" selection-end-line="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/animate/point_tween.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="24" selection-start-column="24" selection-end-column="24" />
+          <folding>
+            <element signature="n#PointTween#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/animate/explode.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="249">
+          <caret line="35" selection-start-line="35" selection-end-line="35" selection-end-column="48" />
+          <folding>
+            <element signature="n#script#7;n#html#0;n#!!top" />
+            <element signature="e#4218#4850#0" />
+            <element signature="e#4990#5113#0" />
+            <element signature="e#5135#5341#0" />
+            <element signature="e#5361#5675#0" />
+            <element signature="e#11797#11809#0" />
+            <element signature="e#11831#11843#0" />
+            <element signature="e#11868#11880#0" />
+            <element signature="e#11907#11919#0" />
+            <element signature="e#11938#12008#0" />
+            <element signature="e#12556#12713#0" />
+            <element signature="e#12746#13631#0" />
+            <element signature="e#13651#13741#0" />
+            <element signature="e#13804#14536#0" />
+            <element signature="e#14563#15365#0" />
+            <element signature="e#15397#16200#0" />
+            <element signature="e#16280#16748#0" />
+            <element signature="e#16774#17597#0" />
+            <element signature="e#17624#18512#0" />
+            <element signature="e#18577#19415#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/animate/single_point.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="187">
+          <caret line="61" column="39" lean-forward="true" selection-start-line="61" selection-start-column="4" selection-end-line="61" selection-end-column="39" />
+          <folding>
+            <element signature="n#style#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#canvas#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#script#6;n#html#0;n#!!top" />
+            <element signature="n#script#7;n#html#0;n#!!top" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/camera/m_active_camera_move.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="144">
+          <caret line="58" column="22" lean-forward="true" selection-start-line="58" selection-start-column="22" selection-end-line="58" selection-end-column="22" />
+          <folding>
+            <element signature="n#script#6;n#html#0;n#!!top" />
+            <element signature="n#script#7;n#html#0;n#!!top" />
+            <element signature="e#1837#21321#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/camera/w-camera-test.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3036">
+          <caret line="190" lean-forward="true" selection-start-line="190" selection-end-line="190" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/camera/m_camera_test1.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-183">
+          <caret line="681" column="13" selection-start-line="681" selection-start-column="13" selection-end-line="681" selection-end-column="13" />
+          <folding>
+            <element signature="e#1988#22645#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/util.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="675">
+          <caret line="43" column="21" selection-start-line="43" selection-start-column="13" selection-end-line="43" selection-end-column="21" />
+          <folding>
+            <element signature="n#!!block;n#setStartCallback#0;n#Tween#0" />
           </folding>
         </state>
       </provider>
