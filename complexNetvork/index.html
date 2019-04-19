@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            width: 100%;
+            height: 100%;
+        }
+
+        div {
+            width: 100%;
+            height: 100%;
+        }
+
+    </style>
+</head>
+<body>
+    <div>
+        <canvas id="container"></canvas>
+    </div>
+</body>
+<script src="../three/WebGL.js"></script>
+<script src="../three/three.js"></script>
+<script src="../three/stats.min.js"></script>
+<script src="../three/OrbitControls.js"></script>
+<script src="../three/dat.gui.min.js"></script>
+<script src="../three/STLLoader.js"></script>
+<script type="module" src="util.js"></script>
+<script type="module" src="./ParticleEllipse.js"></script>
+<script>
+    import ParticleEllipse from './ParticleEllipse.js';
+
+    let container = document.querySelector('#container');
+    let data = [{"community":"860","number":19},{"community":"690","number":19},{"community":"907","number":19},{"community":"704","number":19},{"community":"974","number":19},{"community":"735","number":19},{"community":"290","number":19},{"community":"1917","number":19},{"community":"203","number":19},{"community":"185","number":19},{"community":"900","number":19},{"community":"2556","number":19},{"community":"1944","number":19},{"community":"350","number":19},{"community":"661","number":19},{"community":"164","number":19},{"community":"2442","number":19},{"community":"1621","number":19},{"community":"49","number":19},{"community":"3372","number":19},{"community":"2745","number":19},{"community":"1667","number":18},{"community":"1139","number":18},{"community":"277","number":18},{"community":"874","number":18},{"community":"171","number":18},{"community":"1301","number":18},{"community":"887","number":18},{"community":"271","number":18},{"community":"2560","number":18},{"community":"684","number":18},{"community":"319","number":18},{"community":"72","number":18},{"community":"731","number":18},{"community":"1427","number":18},{"community":"382","number":18},{"community":"3872","number":18},{"community":"3743","number":18},{"community":"2024","number":18},{"community":"594","number":18},{"community":"2007","number":18},{"community":"741","number":18},{"community":"176","number":17},{"community":"637","number":17},{"community":"157","number":17},{"community":"2082","number":17},{"community":"838","number":17},{"community":"323","number":17},{"community":"2178","number":17},{"community":"1550","number":17},{"community":"3365","number":17},{"community":"2076","number":17},{"community":"1213","number":17},{"community":"3472","number":17},{"community":"967","number":17},{"community":"299","number":17},{"community":"233","number":17},{"community":"543","number":17},{"community":"229","number":17},{"community":"1455","number":16},{"community":"1388","number":16},{"community":"1026","number":16},{"community":"842","number":16},{"community":"859","number":16},{"community":"209","number":16},{"community":"2324","number":16},{"community":"258","number":16},{"community":"937","number":16},{"community":"305","number":16},{"community":"304","number":16},{"community":"4100","number":16},{"community":"385","number":16},{"community":"268","number":16},{"community":"21","number":16},{"community":"2847","number":16},{"community":"914","number":16},{"community":"612","number":16},{"community":"763","number":16},{"community":"249","number":16},{"community":"2346","number":16},{"community":"726","number":16},{"community":"461","number":16},{"community":"1604","number":16},{"community":"161","number":16}];
+    window.complex_network_index = new ParticleEllipse(container, data);
+</script>
+</html>
